@@ -1,28 +1,17 @@
 using UnityEngine;
 
-public class PlayerLook : MonoBehaviour
+public class TopDownCameraFollow : MonoBehaviour
 {
-    [SerializeField] private float mouseSensitivity = 100f;
-    [SerializeField] private Transform playerBody; // куб
+    public Transform target;
+    public Vector3 offset = new Vector3(0, 10, -10);
+    public float smoothSpeed = 5f;
 
-    private float xRotation = 0f;
-
-    private void Start()
+    void LateUpdate()
     {
-        Cursor.lockState = CursorLockMode.Locked; // скрываем курсор
-    }
+        if (target == null) return;
 
-    private void Update()
-    {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-
-        // вращение камеры вверх/вниз
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        // вращение куба (влево/вправо)
-        playerBody.Rotate(Vector3.up * mouseX);
+        Vector3 desiredPosition = target.position + offset;
+        transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
+        transform.LookAt(target); // чтобы камера всегда смотрела на игрока
     }
 }

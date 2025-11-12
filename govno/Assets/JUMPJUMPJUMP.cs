@@ -8,14 +8,14 @@ public class PlayerJump : MonoBehaviour
     [SerializeField] private int maxJumps = 2;
 
     [Header("Ground check")]
-    [Tooltip("От центра вверх, чтобы луч не попадал в собственный коллайдер")]
+    [Tooltip("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     [SerializeField] private float originOffsetUp = 0.1f;
-    [Tooltip("Расстояние от origin до земли (пример для куба высотой 1 = 0.6)")]
+    [Tooltip("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ origin пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 1 = 0.6)")]
     [SerializeField] private float groundCheckDistance = 0.6f;
-    [SerializeField] private LayerMask groundMask = 1 << 0; // Default по умолчанию
+    [SerializeField] private LayerMask groundMask = 1 << 0; // Default пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     [Header("Safety")]
-    [SerializeField] private float jumpCooldown = 0.08f; // защита от двойных срабатываний
+    [SerializeField] private float jumpCooldown = 0.08f; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     private Rigidbody rb;
     private int jumpsLeft;
@@ -31,7 +31,7 @@ public class PlayerJump : MonoBehaviour
 
     private void Update()
     {
-        // Буфер запроса прыжка — только когда нажали (один кадр)
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ)
         if (Input.GetKeyDown(KeyCode.Space))
         {
             jumpRequested = true;
@@ -41,37 +41,37 @@ public class PlayerJump : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Надёжная проверка земли:
-        // ставим источник чуть выше центра, чтобы не попасть в собственный коллайдер.
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ:
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
         Vector3 origin = transform.position + Vector3.up * originOffsetUp;
         RaycastHit hit;
         bool hitSomething = Physics.Raycast(origin, Vector3.down, out hit, groundCheckDistance, groundMask, QueryTriggerInteraction.Ignore);
 
-        // Игнорируем попадание в самого себя на всякий случай
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         bool isGrounded = hitSomething && hit.collider != null && hit.collider.gameObject != gameObject;
 
-        // Если только что приземлились — восстановить прыжки
-        // (мы не делаем reset в Update, чтобы избежать гонок с физикой)
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+        // (пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ reset пїЅ Update, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         if (isGrounded)
         {
-            // нормальная ситуация — стоим на земле
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             jumpsLeft = maxJumps;
         }
 
-        // Выполняем прыжок только если был запрос и прошёл cooldown
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ cooldown
         if (jumpRequested)
         {
-            jumpRequested = false; // потребили запрос
+            jumpRequested = false; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
             if (Time.time - lastJumpTime < jumpCooldown)
             {
-                // слишком рано — игнорируем
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 Debug.Log("[Jump] Ignored due to cooldown");
             }
             else if (jumpsLeft > 0)
             {
-                // Прыгаем
-                rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z); // обнуляем Y перед импульсом
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Y пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 jumpsLeft--;
                 lastJumpTime = Time.time;
@@ -86,7 +86,7 @@ public class PlayerJump : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // визуализация луча для отладки
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Gizmos.color = Color.cyan;
         Vector3 origin = transform.position + Vector3.up * originOffsetUp;
         Gizmos.DrawLine(origin, origin + Vector3.down * groundCheckDistance);

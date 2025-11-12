@@ -1,29 +1,42 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : MonoBehaviour
+public class TopDownPlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 5f;
+    public float moveSpeed = 5f;
+    public Camera cam;
+    Rigidbody rb;
 
-    private Rigidbody rb;
-    private Vector3 moveDirection;
+    Vector3 moveInput; // сохраняем ввод между кадрами
 
-    private void Awake()
+    void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true; // чтобы куб не падал на бок
+        rb.interpolation = RigidbodyInterpolation.Interpolate; // на всякий случай
     }
 
-    private void Update()
+    void Update()
     {
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
-
-        moveDirection = transform.right * x + transform.forward * z;
+        // Получаем ввод (только тут!)
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector3(h, 0f, v).normalized;
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
-        rb.MovePosition(rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime);
+        // Движение относительно камеры
+        Vector3 camForward = cam.transform.forward;
+        camForward.y = 0;
+        Vector3 camRight = cam.transform.right;
+        camRight.y = 0;
+
+        Vector3 moveDir = (camForward * moveInput.z + camRight * moveInput.x).normalized;
+
+        rb.MovePosition(rb.position + moveDir * moveSpeed * Time.fixedDeltaTime);
+
+        // Поворот в сторону движения
+        if (moveDir != Vector3.zero)
+            rb.MoveRotation(Quaternion.LookRotation(moveDir));
     }
 }
