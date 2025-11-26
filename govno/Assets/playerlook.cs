@@ -4,14 +4,24 @@ public class TopDownCameraFollow : MonoBehaviour
 {
     public Transform target;
     public Vector3 offset = new Vector3(0, 10, -10);
-    public float smoothSpeed = 5f;
+
+    public float smoothTime = 0.1f;
+    private Vector3 velocity;
 
     void LateUpdate()
     {
-        if (target == null) return;
+        if (!target) return;
 
         Vector3 desiredPosition = target.position + offset;
-        transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-        transform.LookAt(target); // чтобы камера всегда смотрела на игрока
+
+        transform.position = Vector3.SmoothDamp(
+            transform.position,
+            desiredPosition,
+            ref velocity,
+            smoothTime
+        );
+
+        // фиксируем угол, не используем LookAt!
+        transform.rotation = Quaternion.Euler(45f, 0f, 0f);
     }
 }
