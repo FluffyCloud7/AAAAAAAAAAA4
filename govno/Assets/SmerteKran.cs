@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameOverUI : MonoBehaviour
+public class SmerteKran : MonoBehaviour
 {
     public GameObject gameOverPanel;
     public Button restartButton;
@@ -21,21 +21,19 @@ public class GameOverUI : MonoBehaviour
     public void ShowGameOver()
     {
         gameOverPanel.SetActive(true);
-        // Опционально: остановить движение игрока, пауза
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // пауза игры
     }
 
     private void RestartLevel()
     {
-        Time.timeScale = 1f; // Сбрасываем паузу
-        // Телепорт игрока на последний чекпоинт
+        Time.timeScale = 1f;
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.name);
     }
 
     private void GoToMainMenu()
     {
-        Time.timeScale = 1f; // Сбрасываем паузу
+        Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
     }
 }
