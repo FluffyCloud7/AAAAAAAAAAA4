@@ -64,15 +64,15 @@ public class PlayerHealth : MonoBehaviour
         if (smerteKran != null)
             smerteKran.ShowGameOver();
 
-        // Телепорт на чекпоинт
-        if (SaveSystem.HasCheckpoint())
-            transform.position = SaveSystem.LoadPosition();
+       
+        
+           
 
-        // Восстанавливаем здоровье
-        currentHealth = maxHealth;
+       
+        
 
-        // Запускаем корутину включения коллайдера и бессмертия
-        StartCoroutine(RespawnInvulnerability());
+        
+        
     }
 
     private IEnumerator RespawnInvulnerability()
@@ -89,5 +89,19 @@ public class PlayerHealth : MonoBehaviour
         yield return new WaitForSeconds(invulnerabilityDuration);
         isInvulnerable = false;
         IsDead = false;
+    }
+    public void Respawn()
+    {
+        if (SaveSystem.HasCheckpoint())
+            transform.position = SaveSystem.LoadPosition();
+
+        currentHealth = maxHealth;
+        IsDead = false;
+        isInvulnerable = true;
+
+        if (playerCollider != null)
+            playerCollider.enabled = true;
+
+        StartCoroutine(Invulnerability());
     }
 }

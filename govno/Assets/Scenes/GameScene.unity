@@ -776,7 +776,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 3
   invulnerabilityDuration: 2
-  smerteKran: {fileID: 0}
+  smerteKran: {fileID: 1336826008}
 --- !u!114 &232501879
 MonoBehaviour:
   m_ObjectHideFlags: 0

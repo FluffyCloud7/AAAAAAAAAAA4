@@ -27,8 +27,11 @@ public class SmerteKran : MonoBehaviour
     private void RestartLevel()
     {
         Time.timeScale = 1f;
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(currentScene.name);
+
+        PlayerHealth player = FindObjectOfType<PlayerHealth>();
+
+        if (player != null)
+            player.Respawn();
     }
 
     private void GoToMainMenu()
