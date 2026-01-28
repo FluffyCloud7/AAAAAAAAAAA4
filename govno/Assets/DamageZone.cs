@@ -4,7 +4,7 @@ using System.Collections;
 public class DamageZone : MonoBehaviour
 {
     public int damageAmount = 1;
-    public float damageInterval = 0.5f;
+    public float damageInterval = 100f;
 
     private Coroutine damageCoroutine;
 
@@ -15,6 +15,8 @@ public class DamageZone : MonoBehaviour
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
+                playerHealth.OnDeath += () => StopCoroutine(damageCoroutine);
+                if (playerHealth.CurrentHealth >= 0)
                 damageCoroutine = StartCoroutine(DamageLoop(playerHealth));
             }
         }
@@ -24,6 +26,8 @@ public class DamageZone : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            Debug.Log("¿¿¿¿¿¿¿¿¿");
+
             if (damageCoroutine != null)
                 StopCoroutine(damageCoroutine);
         }

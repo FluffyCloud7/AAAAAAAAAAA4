@@ -9,20 +9,30 @@ public class PlayerHealth : MonoBehaviour
 
     public event System.Action<int, int> OnHealthChanged;
 
+    //Мигание при неуязвимости
+    private Renderer playerRenderer;
+    private Coroutine blinkCoroutine;
 
 
     public float invulnerabilityDuration = 2f;
     private bool isInvulnerable = false;
 
+
     public bool IsDead { get; private set; } = false;
+    public event System.Action OnDeath;
 
     private Collider playerCollider;
+    private Rigidbody playerRigidbody;
 
     private void Start()
     {
         currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         playerCollider = GetComponent<Collider>();
+        playerRigidbody = GetComponent<Rigidbody>();
+
+        playerRenderer = GetComponentInChildren<Renderer>();
+
     }
 
     public void TakeDamage(int amount)
@@ -45,8 +55,24 @@ public class PlayerHealth : MonoBehaviour
     private IEnumerator Invulnerability()
     {
         isInvulnerable = true;
+
+        if (blinkCoroutine != null)
+            StopCoroutine(blinkCoroutine);
+
+        blinkCoroutine = StartCoroutine(BlinkRoutine());
+        yield return null;
         yield return new WaitForSeconds(invulnerabilityDuration);
         isInvulnerable = false;
+
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+            blinkCoroutine = null;
+
+            // включаем рендер обратно
+            if (playerRenderer != null)
+                playerRenderer.enabled = true;
+        }
     }
 
     private void Die()
@@ -57,33 +83,35 @@ public class PlayerHealth : MonoBehaviour
         IsDead = true;
 
         // Отключаем коллайдер, чтобы зона урона не мешала
-        if (playerCollider != null)
-            playerCollider.enabled = false; 
+        //if (playerCollider != null)
+            //playerCollider.enabled = false;
+
+        OnDeath?.Invoke();
+
+        StartCoroutine(RespawnAfterDelay());
+        //Respawn();
     }
 
-    private IEnumerator RespawnInvulnerability()
+    private IEnumerator RespawnAfterDelay()
     {
-        isInvulnerable = true;
+        // Если хочешь, можешь сделать задержку 0.5–1 сек.
+        yield return new WaitForSeconds(0f);
 
-        // Ждём чуть-чуть, чтобы UI успел отобразиться
-        yield return new WaitForSeconds(0.1f);
-
-        // Включаем коллайдер обратно
-        if (playerCollider != null)
-            playerCollider.enabled = true;
-
-        yield return new WaitForSeconds(invulnerabilityDuration);
-        isInvulnerable = false;
-        IsDead = false;
+        Respawn();
     }
+
     public void Respawn()
     {
-        if (SaveSystem.HasCheckpoint())
-            transform.position = SaveSystem.LoadPosition();
+        if (respawnController.Instance != null && respawnController.Instance.respawnPoint != null)
+        {
+            Debug.Log(respawnController.Instance.respawnPoint.position);
+            playerRigidbody.position = respawnController.Instance.respawnPoint.position;
+            //transform.position = respawnController.Instance.respawnPoint.position;
+            Debug.Log(transform.position);
+        }
 
         currentHealth = maxHealth;
         IsDead = false;
-        isInvulnerable = true;
 
         if (playerCollider != null)
             playerCollider.enabled = true;
@@ -92,4 +120,21 @@ public class PlayerHealth : MonoBehaviour
 
         StartCoroutine(Invulnerability());
     }
+
+    private IEnumerator BlinkRoutine()
+    {
+        while (isInvulnerable)
+        {
+            if (playerRenderer != null)
+                playerRenderer.enabled = !playerRenderer.enabled;
+
+            yield return new WaitForSeconds(0.15f); // скорость мигания
+        }
+
+        // когда неуязвимость закончилась — включить обратно
+        if (playerRenderer != null)
+            playerRenderer.enabled = true;
+    }
+
+
 }
