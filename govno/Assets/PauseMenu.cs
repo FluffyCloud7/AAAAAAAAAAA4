@@ -38,4 +38,18 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;  // важно вернуть время
         SceneManager.LoadScene(mainMenuScene);
     }
+
+    public void ReturnToCheckpoint()
+    {
+        // Возвращаем время, если пауза стояла
+        Time.timeScale = 1f;
+
+        // Респавним игрока
+        respawnController.Instance.RespawnPlayer();
+
+        // Закрываем меню
+        pauseMenuUI.SetActive(false);
+        isPaused = false;
+    }
+
 }

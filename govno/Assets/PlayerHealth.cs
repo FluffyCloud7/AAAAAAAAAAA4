@@ -5,25 +5,24 @@ public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 3;
     private int currentHealth;
+    public int CurrentHealth => currentHealth;
+
+    public event System.Action<int, int> OnHealthChanged;
+
+
 
     public float invulnerabilityDuration = 2f;
     private bool isInvulnerable = false;
 
     public bool IsDead { get; private set; } = false;
 
-    [SerializeField] private SmerteKran smerteKran; // экран смерти
-
     private Collider playerCollider;
 
     private void Start()
     {
         currentHealth = maxHealth;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         playerCollider = GetComponent<Collider>();
-
-        if (SaveSystem.HasCheckpoint())
-        {
-            transform.position = SaveSystem.LoadPosition();
-        }
     }
 
     public void TakeDamage(int amount)
@@ -31,6 +30,7 @@ public class PlayerHealth : MonoBehaviour
         if (isInvulnerable || IsDead) return;
 
         currentHealth -= amount;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         Debug.Log("HP: " + currentHealth);
 
         if (currentHealth <= 0)
@@ -58,21 +58,7 @@ public class PlayerHealth : MonoBehaviour
 
         // Отключаем коллайдер, чтобы зона урона не мешала
         if (playerCollider != null)
-            playerCollider.enabled = false;
-
-        // Показ экрана смерти
-        if (smerteKran != null)
-            smerteKran.ShowGameOver();
-
-       
-        
-           
-
-       
-        
-
-        
-        
+            playerCollider.enabled = false; 
     }
 
     private IEnumerator RespawnInvulnerability()
@@ -101,6 +87,8 @@ public class PlayerHealth : MonoBehaviour
 
         if (playerCollider != null)
             playerCollider.enabled = true;
+
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
         StartCoroutine(Invulnerability());
     }
