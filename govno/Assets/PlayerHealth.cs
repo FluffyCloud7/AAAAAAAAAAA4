@@ -82,7 +82,7 @@ public class PlayerHealth : MonoBehaviour
         Debug.Log("Player died");
         IsDead = true;
 
-        // Отключаем коллайдер, чтобы зона урона не мешала
+        // Отключаем коллайдер, чтобы зона урона не мешала аааааа
         //if (playerCollider != null)
             //playerCollider.enabled = false;
 
