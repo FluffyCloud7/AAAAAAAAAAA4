@@ -20,20 +20,34 @@ public class NPC : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        if (dialogueData == null || !isDialogueActive)
+        if (dialogueData == null)
+        {
             //И сюда бы паузу въебать во вторую часть или
             return;
-        if (isDialogueActive)
-        {
-            NextLine();
         }
-        else
+
+        if (!isDialogueActive)
         {
             StartDialogue();
         }
+        else
+        {
+            NextLine();
+        }
+
+        //if (isDialogueActive)
+        //{
+        //    NextLine();
+        //}
+       // else
+        //{
+        //    StartDialogue();
+        //}
     }
     void StartDialogue()
     {
+        GamePauseManager.Instance.RequestPause();
+
         isDialogueActive = true;
         dialogueIndex = 0;
 
@@ -57,6 +71,7 @@ public class NPC : MonoBehaviour, IInteractable
         }
         else if(dialogueIndex + 1 < dialogueData.dialogueLines.Length)
         {
+            dialogueIndex++;
             StartCoroutine(TypeLine());
         }
         else
@@ -72,18 +87,19 @@ public class NPC : MonoBehaviour, IInteractable
         foreach(char letter in dialogueData.dialogueLines[dialogueIndex])
         {
             dialogueText.text += letter;
-            yield return new WaitForSeconds(dialogueData.typingSpeed);
+            yield return new WaitForSecondsRealtime(dialogueData.typingSpeed);
         }
         isTyping = false;
 
         if(dialogueData.autoProgressLines.Length > dialogueIndex && dialogueData.autoProgressLines[dialogueIndex])
         {
-            yield return new WaitForSeconds(dialogueData.autoProgressDelay);
+            yield return new WaitForSecondsRealtime(dialogueData.autoProgressDelay);
             NextLine();
         }
     }
     public void EndDialogue()
     {
+        GamePauseManager.Instance.ReleasePause();
         StopAllCoroutines();
         isDialogueActive = false;
         dialogueText.SetText("");

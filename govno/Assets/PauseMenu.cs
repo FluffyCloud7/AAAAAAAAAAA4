@@ -22,14 +22,16 @@ public class PauseMenu : MonoBehaviour
     public void Resume()
     {
         pauseMenuUI.SetActive(false);
-        Time.timeScale = 1f;
+        //Time.timeScale = 1f;
+        GamePauseManager.Instance.ReleasePause();
         isPaused = false;
     }
 
     void Pause()
     {
         pauseMenuUI.SetActive(true);
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
+        GamePauseManager.Instance.RequestPause();
         isPaused = true;
     }
 
