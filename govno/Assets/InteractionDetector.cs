@@ -16,13 +16,13 @@ public class InteractionDetector : MonoBehaviour
         interactionIcon.SetActive(false);
     }
 
-   // void Update()
-  //  {
+    // void Update()
+    //  {
     //    if (UnityEngine.Input.GetKeyDown(KeyCode.E))
     //    {
     //        interactableInRange?.Interact();
-     //   }
-   // }
+    //   }
+    // }
 
     public void OnInteract(InputAction.CallbackContext context)
    {

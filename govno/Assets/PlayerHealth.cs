@@ -39,9 +39,12 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isInvulnerable || IsDead) return;
 
+        
         currentHealth -= amount;
+        SoundEffectManager.Play("HurtSound");
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         Debug.Log("HP: " + currentHealth);
+        
 
         if (currentHealth <= 0)
         {
