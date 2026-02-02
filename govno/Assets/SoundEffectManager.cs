@@ -6,11 +6,12 @@ public class SoundEffectManager : MonoBehaviour
 
     private static SoundEffectManager Instance;
     private static AudioSource audioSource;
+    private static AudioSource voiceaudioSource;
     private static SoundEffectLibrary soundEffectLibrary;
     [SerializeField] private Slider sfxSlider;
     private void Awake()
     {
-        if(Instance = null)
+        if(Instance == null)
         {
             Instance = this;
             audioSource = GetComponent<AudioSource>();
@@ -38,9 +39,16 @@ public class SoundEffectManager : MonoBehaviour
         sfxSlider.onValueChanged.AddListener(delegate { OnValueChanged(); });
     }
 
+    //public static void PlayVoice(AudioClip audioClip, float pitch = 1f)
+    //{
+        //voiceaudioSource.pitch = pitch;
+        //voiceaudioSource.PlayOneShot(audioClip);
+   // }
+
     public static void SetVolume(float volume)
     {
         audioSource.volume = volume;
+        //voiceaudioSource.volume = volume;
     }
 
     public void OnValueChanged()
