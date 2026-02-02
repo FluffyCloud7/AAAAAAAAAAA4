@@ -52,12 +52,16 @@ public class CursorManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
+            
             bool isCursorVisible = Cursor.visible;
 
             if (isCursorVisible)
-                CursorManager.Instance.SetMode(InputMode.Gameplay);
-            else
+            {
                 CursorManager.Instance.SetMode(InputMode.UI);
+                Debug.Log("Опа, R нажали");
+            }
+            else
+                CursorManager.Instance.SetMode(InputMode.Gameplay);
         }
     }
 
