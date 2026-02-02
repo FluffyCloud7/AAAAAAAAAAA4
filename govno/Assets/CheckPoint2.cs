@@ -8,6 +8,13 @@ public class CheckPoint2 : MonoBehaviour
         if (other.CompareTag("Player") )
         {
             respawnController.Instance.respawnPoint = transform;
+
+            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.RestoreFullHealth();
+            }
+
             trigger.enabled = false;
         }
     }

@@ -24,6 +24,7 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(false);
         //Time.timeScale = 1f;
         GamePauseManager.Instance.ReleasePause();
+        CursorManager.Instance.SetMode(InputMode.Gameplay);
         isPaused = false;
     }
 
@@ -32,6 +33,8 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         //Time.timeScale = 0f;
         GamePauseManager.Instance.RequestPause();
+        CursorManager.Instance.SetMode(InputMode.UI);
+
         isPaused = true;
     }
 

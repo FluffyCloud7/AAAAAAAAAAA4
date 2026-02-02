@@ -107,10 +107,10 @@ public class PlayerHealth : MonoBehaviour
     {
         if (respawnController.Instance != null && respawnController.Instance.respawnPoint != null)
         {
-            Debug.Log(respawnController.Instance.respawnPoint.position);
+            //Debug.Log(respawnController.Instance.respawnPoint.position);
             playerRigidbody.position = respawnController.Instance.respawnPoint.position;
             //transform.position = respawnController.Instance.respawnPoint.position;
-            Debug.Log(transform.position);
+            //Debug.Log(transform.position);
         }
 
         currentHealth = maxHealth;
@@ -139,5 +139,12 @@ public class PlayerHealth : MonoBehaviour
             playerRenderer.enabled = true;
     }
 
+    public void RestoreFullHealth()
+    {
+        if (IsDead) return;
+
+        currentHealth = maxHealth;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
 
 }

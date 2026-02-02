@@ -29,6 +29,7 @@ public class NPC : MonoBehaviour, IInteractable
         if (!isDialogueActive)
         {
             StartDialogue();
+
         }
         else
         {
@@ -47,6 +48,8 @@ public class NPC : MonoBehaviour, IInteractable
     void StartDialogue()
     {
         GamePauseManager.Instance.RequestPause();
+        CursorManager.Instance.SetMode(InputMode.Dialogue);
+
 
         isDialogueActive = true;
         dialogueIndex = 0;
@@ -101,6 +104,8 @@ public class NPC : MonoBehaviour, IInteractable
     public void EndDialogue()
     {
         GamePauseManager.Instance.ReleasePause();
+        CursorManager.Instance.SetMode(InputMode.Gameplay);
+
         StopAllCoroutines();
         isDialogueActive = false;
         dialogueText.SetText("");
