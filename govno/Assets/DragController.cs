@@ -3,14 +3,20 @@ using UnityEngine;
 
 public class DragController : MonoBehaviour
 {
-    [SerializeField] private float dragDistance = 10f;
     [SerializeField] private LayerMask draggableLayer;
+
+    [SerializeField] private float scrollSpeed = 2f;
+    [SerializeField] private float minDistance = 0.5f;
+    [SerializeField] private float maxDistance = 20f;
+
 
     private Camera cam;
     private Rigidbody draggedObject;
     private float objectDistance;
 
     private bool isDragging = false;
+
+
 
     private void Awake()
     {
@@ -75,6 +81,14 @@ public class DragController : MonoBehaviour
 
     private void DragObject()
     {
+        float scroll = Input.mouseScrollDelta.y;
+        if (scroll != 0f)
+        {
+            objectDistance += scroll * scrollSpeed;
+            objectDistance = Mathf.Clamp(objectDistance, minDistance, maxDistance);
+        }
+
+
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = objectDistance;
 
