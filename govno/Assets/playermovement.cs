@@ -1,41 +1,64 @@
-using UnityEngine;
+п»їusing UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 public class TopDownPlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public Camera cam;
+
     Rigidbody rb;
+    DefaultInputActions input;
 
-    Vector3 moveInput; // сохраняем ввод между кадрами
+    Vector2 move;      // в†ђ СЃСЋРґР° С‡РёС‚Р°РµРј input system
+    Vector3 moveInput; // в†ђ СЌС‚Рѕ С‚РІРѕР№ СЃС‚Р°СЂС‹Р№ С„РѕСЂРјР°С‚
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        rb.interpolation = RigidbodyInterpolation.Interpolate; // на всякий случай
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        input = new DefaultInputActions();
     }
 
-    void Update()
+    void OnEnable()
     {
-        // Получаем ввод (только тут!)
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-        moveInput = new Vector3(h, 0f, v).normalized;
+        input.Player.Enable();
+
+        input.Player.Move.performed += OnMove;
+        input.Player.Move.canceled += OnMove;
+    }
+
+    void OnDisable()
+    {
+        input.Player.Move.performed -= OnMove;
+        input.Player.Move.canceled -= OnMove;
+
+        input.Player.Disable();
+    }
+
+    void OnMove(InputAction.CallbackContext ctx)
+    {
+        move = ctx.ReadValue<Vector2>();
+
+        // рџ”Ѕ Р’РћРў Р—Р”Р•РЎР¬ РїСЂРѕРёСЃС…РѕРґРёС‚ РєРѕРЅРІРµСЂС‚Р°С†РёСЏ
+        moveInput = new Vector3(move.x, 0f, move.y);
     }
 
     void FixedUpdate()
     {
-        // Движение относительно камеры
+        // Р”РІРёР¶РµРЅРёРµ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РєР°РјРµСЂС‹
         Vector3 camForward = cam.transform.forward;
         camForward.y = 0;
+
         Vector3 camRight = cam.transform.right;
         camRight.y = 0;
 
-        Vector3 moveDir = (camForward * moveInput.z + camRight * moveInput.x).normalized;
+        Vector3 moveDir =
+            (camForward * moveInput.z + camRight * moveInput.x).normalized;
 
         rb.MovePosition(rb.position + moveDir * moveSpeed * Time.fixedDeltaTime);
 
-        // Поворот в сторону движения
         if (moveDir != Vector3.zero)
             rb.MoveRotation(Quaternion.LookRotation(moveDir));
     }

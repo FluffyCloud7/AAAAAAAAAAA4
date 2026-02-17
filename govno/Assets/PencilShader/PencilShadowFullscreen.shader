@@ -1,4 +1,4 @@
-Shader "Custom/PencilShadowFullscreen"
+п»їShader "Custom/PencilShadowFullscreen"
 {
     Properties
 
@@ -89,7 +89,7 @@ float _HatchScale;
 
             half4 frag(Varyings IN) : SV_Target
             {
-                       // Цвет сцены
+                       // Р¦РІРµС‚ СЃС†РµРЅС‹
     float2 uv = IN.uv;
     float2 hatchUV = uv * 20;
 
@@ -129,7 +129,7 @@ half hatch = SAMPLE_TEXTURE2D(
 
 hatch = 1.0 - hatch;
 
-// контраст
+// РєРѕРЅС‚СЂР°СЃС‚
 hatch = pow(hatch, _HatchContrast);
 
 
@@ -149,10 +149,10 @@ hatch = pow(hatch, _HatchContrast);
 );
 
 
-    // Shadow coord (ВАЖНО)
+    // Shadow coord (Р’РђР–РќРћ)
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
 
-    // Реальная тень
+    // Р РµР°Р»СЊРЅР°СЏ С‚РµРЅСЊ
     float shadow = MainLightRealtimeShadow(shadowCoord);
 
 half hatchShadow = lerp(hatch, 1.0, shadow);

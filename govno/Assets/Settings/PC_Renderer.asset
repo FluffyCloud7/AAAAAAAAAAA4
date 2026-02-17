@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pencil Shadow Pass
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
   m_Active: 1
-  injectionPoint: 550
+  injectionPoint: 450
   fetchColorBuffer: 1
   requirements: 0
   passMaterial: {fileID: 2100000, guid: a08f53f3df6690c47900c6a913a3320a, type: 2}
