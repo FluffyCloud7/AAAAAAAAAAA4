@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 7483375637386945165}
   - component: {fileID: 5960760360553678747}
   - component: {fileID: 6896199730753105647}
-  - component: {fileID: 539811876585027489}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -208,12 +207,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   jumpForce: 5
   maxJumps: 1
-  originOffsetUp: 0.1
-  groundCheckDistance: 1.1
   groundMask:
     serializedVersion: 2
     m_Bits: 1
-  jumpCooldown: 0.08
 --- !u!114 &7069945356206428769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,21 +266,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 3
   invulnerabilityDuration: 2
---- !u!114 &539811876585027489
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1490245701420921282}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 430fe812787aa8249ba8b8a7461927d6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  gameOverPanel: {fileID: 0}
-  restartButton: {fileID: 0}
-  mainMenuButton: {fileID: 0}
 --- !u!1 &6044279138395411167
 GameObject:
   m_ObjectHideFlags: 0
