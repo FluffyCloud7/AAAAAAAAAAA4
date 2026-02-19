@@ -8,46 +8,28 @@ public class TopDownPlayerMovement : MonoBehaviour
     public Camera cam;
 
     Rigidbody rb;
-    DefaultInputActions input;
-
-    Vector2 move;      // ← сюда читаем input system
-    Vector3 moveInput; // ← это твой старый формат
+    Vector2 move;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-
-        input = new DefaultInputActions();
     }
 
-    void OnEnable()
+    // PlayerInput вызовет это автоматически
+    public void OnMove(InputValue value)
     {
-        input.Player.Enable();
-
-        input.Player.Move.performed += OnMove;
-        input.Player.Move.canceled += OnMove;
-    }
-
-    void OnDisable()
-    {
-        input.Player.Move.performed -= OnMove;
-        input.Player.Move.canceled -= OnMove;
-
-        input.Player.Disable();
-    }
-
-    void OnMove(InputAction.CallbackContext ctx)
-    {
-        move = ctx.ReadValue<Vector2>();
-
-        // 🔽 ВОТ ЗДЕСЬ происходит конвертация
-        moveInput = new Vector3(move.x, 0f, move.y);
+        move = value.Get<Vector2>();
     }
 
     void FixedUpdate()
     {
-        // Движение относительно камеры
+
+        if (CursorManager.Instance.CurrentMode != InputMode.Gameplay)
+            return;
+
+        Vector3 moveInput = new Vector3(move.x, 0, move.y);
+
         Vector3 camForward = cam.transform.forward;
         camForward.y = 0;
 

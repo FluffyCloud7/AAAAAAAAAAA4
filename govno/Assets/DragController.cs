@@ -25,29 +25,14 @@ public class DragController : MonoBehaviour
 
     private void Update()
     {
-        // ������������ ������ �� R
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ToggleDragMode();
-        }
+        if (CursorManager.Instance == null) return;
 
-        if (!Cursor.visible) return;
+        if (CursorManager.Instance.CurrentMode != InputMode.MouseGameplay)
+            return;
 
         HandleDragging();
     }
 
-    private void ToggleDragMode()
-    {
-        if (Cursor.visible)
-        {
-            CursorManager.Instance.SetMode(InputMode.Gameplay);
-            ReleaseObject();
-        }
-        else
-        {
-            CursorManager.Instance.SetMode(InputMode.UI);
-        }
-    }
 
     private void HandleDragging()
     {

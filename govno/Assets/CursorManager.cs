@@ -1,17 +1,23 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using static UnityEngine.EventSystems.StandaloneInputModule;
+
 
 public enum InputMode
 {
     Gameplay,
+    MouseGameplay,
     Dialogue,
     UI
 }
 
 
 public class CursorManager : MonoBehaviour
+
 {
     public static CursorManager Instance;
+
+    public InputMode CurrentMode { get; private set; }
+
 
     private void Awake()
     {
@@ -28,11 +34,20 @@ public class CursorManager : MonoBehaviour
 
     public void SetMode(InputMode mode)
     {
+        CurrentMode = mode;
+
+        Debug.Log("Mode switched to: " + mode);
+
         switch (mode)
         {
             case InputMode.Gameplay:
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
+                break;
+
+            case InputMode.MouseGameplay:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
                 break;
 
             case InputMode.Dialogue:
@@ -43,26 +58,31 @@ public class CursorManager : MonoBehaviour
         }
     }
 
+
+
     private void Start()
     {
-       CursorManager.Instance.SetMode(InputMode.Gameplay);
+        SetMode(InputMode.Gameplay);
     }
+
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            
-            bool isCursorVisible = Cursor.visible;
-
-            if (isCursorVisible)
+            if (CurrentMode == InputMode.Gameplay)
             {
-                CursorManager.Instance.SetMode(InputMode.UI);
-                Debug.Log("ŒÔ‡, R Ì‡Ê‡ÎË");
+                SetMode(InputMode.MouseGameplay);
+                Debug.Log("Mouse gameplay mode ON");
             }
-            else
-                CursorManager.Instance.SetMode(InputMode.Gameplay);
+            else if (CurrentMode == InputMode.MouseGameplay)
+            {
+                SetMode(InputMode.Gameplay);
+                Debug.Log("Mouse gameplay mode OFF");
+            }
         }
     }
+
+
 
 }

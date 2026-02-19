@@ -1,40 +1,59 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Windows;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-
 
 public class InteractionDetector : MonoBehaviour
 {
     private IInteractable interactableInRange = null;
     public GameObject interactionIcon;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    PlayerInput playerInput;
+    InputAction interactAction;
+
+    void Awake()
+    {
+        playerInput = GetComponentInParent<PlayerInput>();
+
+        if (playerInput == null)
+        {
+            Debug.LogError("PlayerInput not found anywhere!");
+            return;
+        }
+
+        interactAction = playerInput.actions.FindAction("Interact");
+
+        if (interactAction == null)
+        {
+            Debug.LogError("Interact action not found in Input Actions!");
+        }
+    }
+
+
+    void OnEnable()
+    {
+        if (interactAction != null)
+            interactAction.performed += OnInteract;
+    }
+
+    void OnDisable()
+    {
+        if (interactAction != null)
+            interactAction.performed -= OnInteract;
+    }
+
     void Start()
     {
         interactionIcon.SetActive(false);
     }
 
-    // void Update()
-    //  {
-    //    if (UnityEngine.Input.GetKeyDown(KeyCode.E))
-    //    {
-    //        interactableInRange?.Interact();
-    //   }
-    // }
-
-    public void OnInteract(InputAction.CallbackContext context)
-   {
-       if (context.performed)
-       {
-           interactableInRange?.Interact();
-       }
-   }
-
-    private void OnTriggerEnter(Collider other) //might be problematic, should check
+    void OnInteract(InputAction.CallbackContext ctx)
     {
-        if(other.TryGetComponent(out IInteractable interactable) && interactable.CanInteract())
+        Debug.Log("OnInteract called");
+        interactableInRange?.Interact();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out IInteractable interactable) && interactable.CanInteract())
         {
             interactableInRange = interactable;
             interactionIcon.SetActive(true);

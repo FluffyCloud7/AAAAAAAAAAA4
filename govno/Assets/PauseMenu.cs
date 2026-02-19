@@ -46,15 +46,16 @@ public class PauseMenu : MonoBehaviour
 
     public void ReturnToCheckpoint()
     {
-        // Возвращаем время, если пауза стояла
-        Time.timeScale = 1f;
+        GamePauseManager.Instance.ReleasePause();
 
-        // Респавним игрока
         respawnController.Instance.RespawnPlayer();
 
-        // Закрываем меню
         pauseMenuUI.SetActive(false);
+
+        CursorManager.Instance.SetMode(InputMode.Gameplay);
+
         isPaused = false;
     }
+
 
 }

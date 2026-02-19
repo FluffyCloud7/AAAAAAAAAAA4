@@ -13497,7 +13497,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_NotificationBehavior: 2
+  m_NotificationBehavior: 0
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -13602,19 +13602,6 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &1012753019
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1012753006}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cab0a2fa0eea02045b04edee1fd71746, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementInput
-  move: {x: 0, y: 0}
 --- !u!1 &1013470945
 GameObject:
   m_ObjectHideFlags: 0
@@ -14655,6 +14642,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1302723609}
   - component: {fileID: 1302723608}
+  - component: {fileID: 1302723610}
   m_Layer: 0
   m_Name: Virtual Camera
   m_TagString: Untagged
@@ -14717,6 +14705,23 @@ Transform:
   - {fileID: 613909268}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 25, y: 0, z: 0}
+--- !u!114 &1302723610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302723607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9344a91532a2b32488fef24847c22967, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraDistanceMove
+  mouseVolume: {fileID: 2113632996}
+  effectSmooth: 4
+  farDistance: 18
+  mouseTilt: 30
+  smooth: 6
 --- !u!1 &1313883522
 GameObject:
   m_ObjectHideFlags: 0
@@ -20523,7 +20528,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -22919,6 +22924,55 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.99999994}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &2113632995
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2113632997}
+  - component: {fileID: 2113632996}
+  m_Layer: 0
+  m_Name: 'MouseCameraVolume '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2113632996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113632995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 60dd14403591d504ba4a028cb4b00d0b, type: 2}
+--- !u!4 &2113632997
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113632995}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.98862004, y: 0.17674267, z: -1.1661139}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1366010510140503580
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22991,7 +23045,7 @@ PrefabInstance:
     - target: {fileID: 160963280727717312, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: cam
       value: 
-      objectReference: {fileID: 88789288}
+      objectReference: {fileID: 1499570100}
     - target: {fileID: 160963280727717312, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -23052,7 +23106,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 5960760360553678747, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 539811876585027489, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5302745961718653468, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
@@ -23062,9 +23121,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1490245701420921282, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1012753018}
-    - targetCorrespondingSourceObject: {fileID: 1490245701420921282, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1012753019}
   m_SourcePrefab: {fileID: 100100000, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
 --- !u!1001 &3837834532297985137
 PrefabInstance:
@@ -23236,3 +23292,4 @@ SceneRoots:
   - {fileID: 928331276}
   - {fileID: 1366010510140503580}
   - {fileID: 373169004}
+  - {fileID: 2113632997}

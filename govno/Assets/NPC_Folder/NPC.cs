@@ -47,6 +47,9 @@ public class NPC : MonoBehaviour, IInteractable
     }
     void StartDialogue()
     {
+        dialoguePanel.SetActive(true);
+        Debug.Log(dialoguePanel.activeSelf);
+
         GamePauseManager.Instance.RequestPause();
         CursorManager.Instance.SetMode(InputMode.Dialogue);
 

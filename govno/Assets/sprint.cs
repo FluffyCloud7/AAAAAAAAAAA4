@@ -1,13 +1,14 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SprintController : MonoBehaviour
 {
-    public TopDownPlayerMovement movement; // ссылка на твой скрипт передвижения
-    public float sprintMultiplier = 1.8f;  // во сколько раз быстрее при спринте
+    public TopDownPlayerMovement movement;
+    public float sprintMultiplier = 1.8f;
 
     float baseSpeed;
 
-    void Start()
+    void Awake()
     {
         if (movement == null)
             movement = GetComponent<TopDownPlayerMovement>();
@@ -17,13 +18,10 @@ public class SprintController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            movement.moveSpeed = baseSpeed * sprintMultiplier;
-        }
-        else
-        {
-            movement.moveSpeed = baseSpeed;
-        }
+        bool sprintHeld = Keyboard.current.leftShiftKey.isPressed;
+
+        movement.moveSpeed = sprintHeld
+            ? baseSpeed * sprintMultiplier
+            : baseSpeed;
     }
 }
