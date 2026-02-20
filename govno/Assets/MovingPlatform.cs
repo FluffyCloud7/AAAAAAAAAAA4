@@ -16,8 +16,14 @@ public class MovingPlatform : MonoBehaviour
     private float waitTimer;
     private Vector3[] worldPoints;
 
+    public Vector3 DeltaMovement { get; private set; }
+
+    private Vector3 lastPosition;
+    //Это для characterMovement
+
     private void Start()
     {
+        lastPosition = transform.position;
         worldPoints = new Vector3[localPoints.Length];
         for (int i = 0; i < localPoints.Length; i++)
         {
@@ -48,6 +54,8 @@ public class MovingPlatform : MonoBehaviour
             waitTimer = waitTimeAtPoint;
             NextPoint();
         }
+        DeltaMovement = transform.position - lastPosition;
+        lastPosition = transform.position;
     }
 
     private void NextPoint()

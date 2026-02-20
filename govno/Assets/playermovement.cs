@@ -1,45 +1,79 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterController))]
 public class TopDownPlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public Camera cam;
+    public float rotationSpeed = 10f;
+    public float gravity = -9.81f;
 
-    Rigidbody rb;
+    CharacterController controller;
     Vector2 move;
+    float verticalVelocity;
+
+    private MovingPlatform currentPlatform;
 
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        controller = GetComponent<CharacterController>();
     }
 
-    // PlayerInput вызовет это автоматически
     public void OnMove(InputValue value)
     {
         move = value.Get<Vector2>();
     }
 
-    void FixedUpdate()
+    public void SetVerticalVelocity(float value)
+    {
+        verticalVelocity = value;
+    }
+
+    void Update()
     {
         if (CursorManager.Instance.CurrentMode != InputMode.Gameplay)
             return;
 
         Vector3 moveDir = new Vector3(move.x, 0, move.y).normalized;
 
-        rb.MovePosition(rb.position + moveDir * moveSpeed * Time.fixedDeltaTime);
+        if (controller.isGrounded && verticalVelocity < 0)
+            verticalVelocity = -2f;
+
+        verticalVelocity += gravity * Time.deltaTime;
+
+        Vector3 velocity = moveDir * moveSpeed;
+        velocity.y = verticalVelocity;
+
+        if (controller.isGrounded)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f))
+            {
+                currentPlatform = hit.collider.GetComponentInParent<MovingPlatform>();
+            }
+        }
+        else
+        {
+            currentPlatform = null;
+        }
+
+        Vector3 platformMovement = Vector3.zero;
+
+        if (currentPlatform != null)
+        {
+            platformMovement = currentPlatform.DeltaMovement;
+        }
+
+        controller.Move(velocity * Time.deltaTime + platformMovement);
 
         if (moveDir != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-            rb.MoveRotation(Quaternion.Slerp(
-                rb.rotation,
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
                 targetRotation,
-                10f * Time.fixedDeltaTime
-            ));
+                rotationSpeed * Time.deltaTime
+            );
         }
     }
-
 }

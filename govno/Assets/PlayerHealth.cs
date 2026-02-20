@@ -13,6 +13,7 @@ public class PlayerHealth : MonoBehaviour
     private Renderer playerRenderer;
     private Coroutine blinkCoroutine;
 
+    public event System.Action OnRespawn;
 
     public float invulnerabilityDuration = 2f;
     private bool isInvulnerable = false;
@@ -22,14 +23,14 @@ public class PlayerHealth : MonoBehaviour
     public event System.Action OnDeath;
 
     private Collider playerCollider;
-    private Rigidbody playerRigidbody;
+    private CharacterController characterController;
 
     private void Start()
     {
         currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         playerCollider = GetComponent<Collider>();
-        playerRigidbody = GetComponent<Rigidbody>();
+        characterController = GetComponent<CharacterController>();
 
         playerRenderer = GetComponentInChildren<Renderer>();
 
@@ -105,12 +106,22 @@ public class PlayerHealth : MonoBehaviour
 
     public void Respawn()
     {
-        if (respawnController.Instance != null && respawnController.Instance.respawnPoint != null)
+        if (respawnController.Instance != null &&
+            respawnController.Instance.respawnPoint != null)
         {
-            //Debug.Log(respawnController.Instance.respawnPoint.position);
-            playerRigidbody.position = respawnController.Instance.respawnPoint.position;
-            //transform.position = respawnController.Instance.respawnPoint.position;
-            //Debug.Log(transform.position);
+            Vector3 spawnPos = respawnController.Instance.respawnPoint.position;
+
+            if (characterController != null)
+            {
+                characterController.enabled = false;
+                transform.position = spawnPos;
+                characterController.enabled = true;
+            }
+            else
+            {
+                transform.position = spawnPos;
+            }
+            OnRespawn?.Invoke();
         }
 
         currentHealth = maxHealth;

@@ -15,7 +15,7 @@ public class NPC : MonoBehaviour, IInteractable
 
     public bool CanInteract()
     {
-        return !isDialogueActive;
+        return true;
     }
 
     public void Interact()

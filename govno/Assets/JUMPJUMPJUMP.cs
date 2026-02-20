@@ -1,48 +1,36 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterController))]
 public class PlayerJump : MonoBehaviour
 {
-    public float jumpForce = 6f;
+    public float jumpHeight = 2f;
     public int maxJumps = 2;
-    public LayerMask groundMask;
 
-    Rigidbody rb;
+    CharacterController controller;
+    TopDownPlayerMovement movement;
+
     int jumpsLeft;
 
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
+        controller = GetComponent<CharacterController>();
+        movement = GetComponent<TopDownPlayerMovement>();
         jumpsLeft = maxJumps;
     }
 
-    // вызывается PlayerInput автоматически
     public void OnJump(InputValue value)
     {
         if (!value.isPressed) return;
 
-        if (IsGrounded())
+        if (controller.isGrounded)
             jumpsLeft = maxJumps;
 
         if (jumpsLeft > 0)
         {
-            Vector3 vel = rb.linearVelocity;
-            vel.y = 0;
-            rb.linearVelocity = vel;
-
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            float jumpVelocity = Mathf.Sqrt(jumpHeight * -2f * movement.gravity);
+            movement.SetVerticalVelocity(jumpVelocity);
             jumpsLeft--;
         }
-    }
-
-    bool IsGrounded()
-    {
-        return Physics.Raycast(
-            transform.position,
-            Vector3.down,
-            1.1f,
-            groundMask
-        );
     }
 }

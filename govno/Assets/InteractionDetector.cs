@@ -1,71 +1,53 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class InteractionDetector : MonoBehaviour
 {
-    private IInteractable interactableInRange = null;
     public GameObject interactionIcon;
-
-    PlayerInput playerInput;
-    InputAction interactAction;
-
-    void Awake()
-    {
-        playerInput = GetComponentInParent<PlayerInput>();
-
-        if (playerInput == null)
-        {
-            Debug.LogError("PlayerInput not found anywhere!");
-            return;
-        }
-
-        interactAction = playerInput.actions.FindAction("Interact");
-
-        if (interactAction == null)
-        {
-            Debug.LogError("Interact action not found in Input Actions!");
-        }
-    }
-
-
-    void OnEnable()
-    {
-        if (interactAction != null)
-            interactAction.performed += OnInteract;
-    }
-
-    void OnDisable()
-    {
-        if (interactAction != null)
-            interactAction.performed -= OnInteract;
-    }
+    public float interactionRadius = 2f;
 
     void Start()
     {
         interactionIcon.SetActive(false);
     }
 
-    void OnInteract(InputAction.CallbackContext ctx)
+    void Update()
     {
-        Debug.Log("OnInteract called");
-        interactableInRange?.Interact();
+        CheckForInteractable();
     }
 
-    private void OnTriggerEnter(Collider other)
+    void CheckForInteractable()
     {
-        if (other.TryGetComponent(out IInteractable interactable) && interactable.CanInteract())
+        Collider[] hits = Physics.OverlapSphere(transform.position, interactionRadius);
+
+        bool found = false;
+
+        foreach (var hit in hits)
         {
-            interactableInRange = interactable;
-            interactionIcon.SetActive(true);
+            IInteractable interactable = hit.GetComponentInParent<IInteractable>();
+            if (interactable != null && interactable.CanInteract())
+            {
+                found = true;
+                break;
+            }
         }
+
+        interactionIcon.SetActive(found);
     }
 
-    private void OnTriggerExit(Collider other)
+    public void TriggerInteraction()
     {
-        if (other.TryGetComponent(out IInteractable interactable) && interactable == interactableInRange)
+        Collider[] hits = Physics.OverlapSphere(transform.position, interactionRadius);
+
+        foreach (var hit in hits)
         {
-            interactableInRange = null;
-            interactionIcon.SetActive(false);
+            IInteractable interactable = hit.GetComponentInParent<IInteractable>();
+            if (interactable != null && interactable.CanInteract())
+            {
+                interactable.Interact();
+                return;
+            }
         }
+
+        Debug.Log("No interactable in range");
     }
 }
