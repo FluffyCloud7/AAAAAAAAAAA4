@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 public class DragController : MonoBehaviour
@@ -46,6 +46,8 @@ public class DragController : MonoBehaviour
             DragObject();
     }
 
+    private Collider draggedCollider;
+
     private void TryPickObject()
     {
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -55,6 +57,8 @@ public class DragController : MonoBehaviour
             if (hit.rigidbody != null)
             {
                 draggedObject = hit.rigidbody;
+                draggedCollider = draggedObject.GetComponent<Collider>();
+
                 draggedObject.useGravity = false;
                 draggedObject.linearDamping = 10f;
 
@@ -63,6 +67,7 @@ public class DragController : MonoBehaviour
             }
         }
     }
+
 
     private void DragObject()
     {
@@ -73,13 +78,17 @@ public class DragController : MonoBehaviour
             objectDistance = Mathf.Clamp(objectDistance, minDistance, maxDistance);
         }
 
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        Vector3 targetPos = ray.GetPoint(objectDistance);
 
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = objectDistance;
+        Vector3 forceDir = targetPos - draggedObject.position;
 
-        Vector3 worldPos = cam.ScreenToWorldPoint(mousePos);
-        draggedObject.MovePosition(worldPos);
+        float forceMultiplier = 20f;
+
+        draggedObject.AddForce(forceDir * forceMultiplier, ForceMode.Acceleration);
     }
+
+
 
     private void ReleaseObject()
     {
@@ -87,7 +96,10 @@ public class DragController : MonoBehaviour
 
         draggedObject.useGravity = true;
         draggedObject.linearDamping = 0f;
+
         draggedObject = null;
+        draggedCollider = null;
         isDragging = false;
     }
+
 }

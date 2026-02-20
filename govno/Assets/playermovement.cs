@@ -24,24 +24,22 @@ public class TopDownPlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-
         if (CursorManager.Instance.CurrentMode != InputMode.Gameplay)
             return;
 
-        Vector3 moveInput = new Vector3(move.x, 0, move.y);
-
-        Vector3 camForward = cam.transform.forward;
-        camForward.y = 0;
-
-        Vector3 camRight = cam.transform.right;
-        camRight.y = 0;
-
-        Vector3 moveDir =
-            (camForward * moveInput.z + camRight * moveInput.x).normalized;
+        Vector3 moveDir = new Vector3(move.x, 0, move.y).normalized;
 
         rb.MovePosition(rb.position + moveDir * moveSpeed * Time.fixedDeltaTime);
 
         if (moveDir != Vector3.zero)
-            rb.MoveRotation(Quaternion.LookRotation(moveDir));
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
+            rb.MoveRotation(Quaternion.Slerp(
+                rb.rotation,
+                targetRotation,
+                10f * Time.fixedDeltaTime
+            ));
+        }
     }
+
 }
