@@ -3,20 +3,15 @@ using Cinemachine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-
-
 public class CameraDistanceMove : MonoBehaviour
 {
-
     public Volume mouseVolume;
     public float effectSmooth = 4f;
 
     private float volumeWeight = 0f;
 
-    private DepthOfField dof;
-
     public float farDistance = 7f;
-    public float mouseTilt = 25f;   // угол птичьего полёта
+    public float mouseTilt = 25f;
     public float smooth = 6f;
 
     private CinemachineVirtualCamera vcam;
@@ -31,11 +26,6 @@ public class CameraDistanceMove : MonoBehaviour
 
     void Awake()
     {
-        if (mouseVolume.profile.TryGet(out dof))
-        {
-            dof.active = false;
-        }
-
         vcam = GetComponent<CinemachineVirtualCamera>();
 
         thirdPerson = vcam.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
@@ -46,39 +36,51 @@ public class CameraDistanceMove : MonoBehaviour
 
         currentDistance = defaultDistance;
         currentTilt = defaultTilt;
+
+        // ВАЖНО: Volume всегда активен, просто ставим вес 0
+        if (mouseVolume != null)
+            mouseVolume.weight = 0f;
     }
 
-    void Update()
+    void LateUpdate()
     {
-
         if (CursorManager.Instance == null) return;
 
         bool mouseMode =
-          CursorManager.Instance.CurrentMode == InputMode.MouseGameplay;
-
+            CursorManager.Instance.CurrentMode == InputMode.MouseGameplay;
 
         float targetDistance = mouseMode ? farDistance : defaultDistance;
         float targetTilt = mouseMode ? mouseTilt : defaultTilt;
 
-        currentDistance = Mathf.Lerp(currentDistance, targetDistance, Time.deltaTime * smooth);
-        currentTilt = Mathf.LerpAngle(currentTilt, targetTilt, Time.deltaTime * smooth);
+        currentDistance = Mathf.Lerp(
+            currentDistance,
+            targetDistance,
+            Time.deltaTime * smooth
+        );
+
+        currentTilt = Mathf.LerpAngle(
+            currentTilt,
+            targetTilt,
+            Time.deltaTime * smooth
+        );
 
         SetDistance(currentDistance);
 
-        var rot = vcam.transform.localEulerAngles;
-        rot.x = currentTilt;
-        vcam.transform.localEulerAngles = rot;
+        // Меняем наклон аккуратно
+        Quaternion targetRotation = Quaternion.Euler(currentTilt, 0f, 0f);
+        vcam.transform.localRotation = targetRotation;
 
+        // Управляем ТОЛЬКО весом Volume
         float targetWeight = mouseMode ? 1f : 0f;
 
-        volumeWeight = Mathf.Lerp(volumeWeight, targetWeight, Time.deltaTime * effectSmooth);
+        volumeWeight = Mathf.Lerp(
+            volumeWeight,
+            targetWeight,
+            Time.deltaTime * effectSmooth
+        );
 
         if (mouseVolume != null)
             mouseVolume.weight = volumeWeight;
-
-        if (dof != null)
-            dof.active = mouseMode;
-
     }
 
     float GetDistance()

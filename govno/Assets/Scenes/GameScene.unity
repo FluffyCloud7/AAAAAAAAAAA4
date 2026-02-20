@@ -14715,6 +14715,7 @@ GameObject:
   - component: {fileID: 1302723609}
   - component: {fileID: 1302723608}
   - component: {fileID: 1302723610}
+  - component: {fileID: 1302723611}
   m_Layer: 0
   m_Name: VCam_Mouse
   m_TagString: Untagged
@@ -14789,11 +14790,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9344a91532a2b32488fef24847c22967, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraDistanceMove
-  mouseVolume: {fileID: 2113632996}
+  mouseVolume: {fileID: 0}
   effectSmooth: 4
   farDistance: 18
   mouseTilt: 48
   smooth: 1
+--- !u!114 &1302723611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302723607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 449ef5ebbe24720439ec31d15f7b6f3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Cinemachine::Cinemachine.PostFX.CinemachineVolumeSettings
+  m_FocusTracksTarget: 0
+  m_FocusTracking: 0
+  m_FocusTarget: {fileID: 0}
+  m_FocusOffset: 0
+  m_Profile: {fileID: 11400000, guid: 60dd14403591d504ba4a028cb4b00d0b, type: 2}
 --- !u!1 &1313883522
 GameObject:
   m_ObjectHideFlags: 0
@@ -23108,7 +23126,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2113632995}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
   m_Name: 
@@ -23413,6 +23431,18 @@ PrefabInstance:
       propertyPath: playerHealth
       value: 
       objectReference: {fileID: 232501878}
+    - target: {fileID: 2994862756234629040, guid: b071abaa492f91a43af6ca611b05dc94, type: 3}
+      propertyPath: m_Color.b
+      value: 0.3075797
+      objectReference: {fileID: 0}
+    - target: {fileID: 2994862756234629040, guid: b071abaa492f91a43af6ca611b05dc94, type: 3}
+      propertyPath: m_Color.g
+      value: 0.27843142
+      objectReference: {fileID: 0}
+    - target: {fileID: 2994862756234629040, guid: b071abaa492f91a43af6ca611b05dc94, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6371753016135861832, guid: b071abaa492f91a43af6ca611b05dc94, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
