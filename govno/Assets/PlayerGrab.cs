@@ -2,19 +2,27 @@ using UnityEngine;
 
 public class PlayerGrabIso : MonoBehaviour
 {
-    public float holdDistance = 2f;      // �� ����� ���������� ������ ������
-    public float moveSpeed = 10f;        // �������� ����������� ������������� �������
-    public Transform holdParent;         // ����� ����� �������, ��� ������ �������
+    public Transform holdParent;
+    public float grabRange = 2f;
+    public KeyCode grabKey = KeyCode.E;
 
-    private GameObject heldObject = null;
-    private Rigidbody heldRb = null;
+    private GameObject heldObject;
+    private Rigidbody heldRb;
+    private Collider heldCollider;
+    private Collider playerCollider;
 
-    public float grabRange = 2f;         // ������ ������ �������� ��� ��������
+    void Start()
+    {
+        playerCollider = GetComponent<Collider>();
+    }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(grabKey))
         {
+            if (HasInteractableNearby())
+                return;
+
             if (heldObject == null)
                 TryGrab();
             else
@@ -22,62 +30,70 @@ public class PlayerGrabIso : MonoBehaviour
         }
 
         if (heldObject != null)
-            MoveHeldObject();
+            FollowHoldPoint();
+    }
+
+    bool HasInteractableNearby()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, grabRange);
+
+        foreach (var hit in hits)
+        {
+            IInteractable interactable = hit.GetComponentInParent<IInteractable>();
+            if (interactable != null && interactable.CanInteract())
+                return true;
+        }
+
+        return false;
     }
 
     void TryGrab()
     {
-        // ���� ��������� ������ � ����� "Grabbable" � ������� grabRange
         Collider[] hits = Physics.OverlapSphere(transform.position, grabRange);
+
         foreach (Collider hit in hits)
         {
             if (hit.CompareTag("Grabbable"))
             {
                 heldObject = hit.gameObject;
                 heldRb = heldObject.GetComponent<Rigidbody>();
+                heldCollider = hit;
 
                 if (heldRb != null)
                 {
                     heldRb.useGravity = false;
-                    heldRb.linearVelocity = Vector3.zero;
-                    heldRb.angularVelocity = Vector3.zero;
+                    heldRb.isKinematic = true;
                 }
 
-                heldObject.transform.SetParent(holdParent);
-                return; // ���� ������ ���� ������
+                // Игнор физики игрока, иначе все уезжает нафиг
+                if (playerCollider != null && heldCollider != null)
+                    Physics.IgnoreCollision(playerCollider, heldCollider, true);
+
+                return;
             }
         }
     }
 
-    void MoveHeldObject()
+    void FollowHoldPoint()
     {
-        if (heldObject == null) return;
-
-        Vector3 targetPos = holdParent.position + holdParent.forward * holdDistance;
-        if (heldRb != null)
-        {
-            Vector3 moveDir = targetPos - heldObject.transform.position;
-            heldRb.linearVelocity = moveDir * moveSpeed;
-        }
-        else
-        {
-            heldObject.transform.position = targetPos;
-        }
+        heldObject.transform.position = holdParent.position;
+        heldObject.transform.rotation = transform.rotation;
     }
 
     void Drop()
     {
-        if (heldObject != null && heldRb != null)
+        if (heldRb != null)
         {
             heldRb.useGravity = true;
-            heldRb.linearVelocity = Vector3.zero;
-            heldRb.angularVelocity = Vector3.zero;
+            heldRb.isKinematic = false;
         }
 
-        if (heldObject != null)
-            heldObject.transform.SetParent(null);
+        // Возвращение физики
+        if (playerCollider != null && heldCollider != null)
+            Physics.IgnoreCollision(playerCollider, heldCollider, false);
 
         heldObject = null;
         heldRb = null;
+        heldCollider = null;
     }
 }

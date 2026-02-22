@@ -47,7 +47,5 @@ public class InteractionDetector : MonoBehaviour
                 return;
             }
         }
-
-        Debug.Log("No interactable in range");
     }
 }
