@@ -13,6 +13,17 @@ public enum InputMode
 public class CursorManager : MonoBehaviour
 {
     public static CursorManager Instance;
+    private bool mouseModeAllowed = true;
+
+    public void SetMouseModeAllowed(bool allowed)
+    {
+        mouseModeAllowed = allowed;
+
+        if (!allowed && CurrentMode == InputMode.MouseGameplay)
+        {
+            SetMode(InputMode.Gameplay);
+        }
+    }
 
     public InputMode CurrentMode { get; private set; }
 
@@ -104,6 +115,9 @@ public class CursorManager : MonoBehaviour
 
     private void Update()
     {
+        if (!mouseModeAllowed)
+            return;
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             if (CurrentMode == InputMode.Gameplay)
