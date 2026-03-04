@@ -6607,6 +6607,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenu
   pauseMenuUI: {fileID: 1159430612}
   mainMenuScene: MainMenu
+  player: {fileID: 0}
 --- !u!4 &234672934
 Transform:
   m_ObjectHideFlags: 0
@@ -28657,7 +28658,7 @@ PrefabInstance:
     - target: {fileID: 143471574969230975, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+      objectReference: {fileID: 0}
     - target: {fileID: 160963280727717312, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: cam
       value: 

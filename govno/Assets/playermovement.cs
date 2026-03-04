@@ -4,10 +4,14 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class TopDownPlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float rotationSpeed = 10f;
-    public float gravity = -9.81f;
-    
+    public float moveSpeed = 7f;
+    public float rotationSpeed = 12f;
+
+    public float gravity = -30f;              // сильнее обычной
+    public float fallMultiplier = 2f;         // ускоренное падение
+    public float acceleration = 60f;          // разгон
+    public float deceleration = 70f;          // торможение
+    public float airControl = 0.6f;           // контроль в воздухе
 
     Animator animator;
 
@@ -16,6 +20,8 @@ public class TopDownPlayerMovement : MonoBehaviour
     float verticalVelocity;
 
     private MovingPlatform currentPlatform;
+
+    Vector3 currentHorizontalVelocity;        // НОВОЕ
 
     void Awake()
     {
@@ -35,18 +41,50 @@ public class TopDownPlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (CursorManager.Instance.CurrentMode != InputMode.Gameplay)
-            return;
+        bool canControl = CursorManager.Instance.CurrentMode == InputMode.Gameplay;
 
-        Vector3 moveDir = new Vector3(move.x, 0, move.y).normalized;
+        Vector3 inputDir = Vector3.zero;
+
+        if (canControl)
+            inputDir = new Vector3(move.x, 0, move.y).normalized;
+
+        // ---------- ГОРИЗОНТАЛЬНОЕ ДВИЖЕНИЕ (ПЛАВНОЕ) ----------
+
+        float control = controller.isGrounded ? 1f : airControl;
+
+        Vector3 targetVelocity = inputDir * moveSpeed * control;
+
+        if (inputDir != Vector3.zero)
+        {
+            currentHorizontalVelocity = Vector3.MoveTowards(
+                currentHorizontalVelocity,
+                targetVelocity,
+                acceleration * Time.deltaTime
+            );
+        }
+        else
+        {
+            float decel = controller.isGrounded ? deceleration : deceleration * 0.3f;
+
+            currentHorizontalVelocity = Vector3.MoveTowards(
+                currentHorizontalVelocity,
+                Vector3.zero,
+                decel * Time.deltaTime
+            );
+        }
+
+        // ---------- ГРАВИТАЦИЯ ----------
 
         if (controller.isGrounded && verticalVelocity < 0)
             verticalVelocity = -2f;
 
-        verticalVelocity += gravity * Time.deltaTime;
+        // разная гравитация вверх и вниз
+        if (verticalVelocity < 0)
+            verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
+        else
+            verticalVelocity += gravity * Time.deltaTime;
 
-        Vector3 velocity = moveDir * moveSpeed;
-        velocity.y = verticalVelocity;
+        // ---------- ПЛАТФОРМА ----------
 
         if (controller.isGrounded)
         {
@@ -64,15 +102,20 @@ public class TopDownPlayerMovement : MonoBehaviour
         Vector3 platformMovement = Vector3.zero;
 
         if (currentPlatform != null)
-        {
             platformMovement = currentPlatform.DeltaMovement;
-        }
 
-        controller.Move(velocity * Time.deltaTime + platformMovement);
+        // ---------- MOVE ----------
 
-        if (moveDir != Vector3.zero)
+        Vector3 finalVelocity = currentHorizontalVelocity;
+        finalVelocity.y = verticalVelocity;
+
+        controller.Move(finalVelocity * Time.deltaTime + platformMovement);
+
+        // ---------- ПОВОРОТ ----------
+
+        if (canControl && inputDir != Vector3.zero)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
+            Quaternion targetRotation = Quaternion.LookRotation(inputDir);
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 targetRotation,
@@ -80,9 +123,7 @@ public class TopDownPlayerMovement : MonoBehaviour
             );
         }
 
-        float speedPercent = move.magnitude;
-        animator.SetFloat("Speed", speedPercent);
-
+        animator.SetFloat("Speed", canControl ? currentHorizontalVelocity.magnitude : 0f);
         animator.SetBool("IsGrounded", controller.isGrounded);
     }
 }
