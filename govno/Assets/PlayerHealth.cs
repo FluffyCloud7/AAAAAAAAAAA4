@@ -106,6 +106,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void Respawn()
     {
+        Debug.Log("RespawnPlayer called");
         if (respawnController.Instance != null &&
             respawnController.Instance.respawnPoint != null)
         {

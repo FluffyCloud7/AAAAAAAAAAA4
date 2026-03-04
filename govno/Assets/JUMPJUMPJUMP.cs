@@ -5,7 +5,9 @@ using UnityEngine.InputSystem;
 public class PlayerJump : MonoBehaviour
 {
     public float jumpHeight = 2f;
-    public int maxJumps = 2;
+    public int maxJumps = 1;
+
+    Animator animator;
 
     CharacterController controller;
     TopDownPlayerMovement movement;
@@ -17,6 +19,7 @@ public class PlayerJump : MonoBehaviour
         controller = GetComponent<CharacterController>();
         movement = GetComponent<TopDownPlayerMovement>();
         jumpsLeft = maxJumps;
+        animator = GetComponentInChildren<Animator>();
     }
 
     public void OnJump(InputValue value)
@@ -30,6 +33,7 @@ public class PlayerJump : MonoBehaviour
         {
             float jumpVelocity = Mathf.Sqrt(jumpHeight * -2f * movement.gravity);
             movement.SetVerticalVelocity(jumpVelocity);
+            animator.SetTrigger("Jump");
             jumpsLeft--;
         }
     }

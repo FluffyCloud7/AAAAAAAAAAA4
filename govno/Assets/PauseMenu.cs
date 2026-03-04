@@ -5,6 +5,7 @@ public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenuUI;
     public string mainMenuScene = "MainMenu";  // название сцены главного меню
+    public PlayerHealth player;
 
     private bool isPaused = false;
 
@@ -48,10 +49,10 @@ public class PauseMenu : MonoBehaviour
     {
         GamePauseManager.Instance.ReleasePause();
 
-        respawnController.Instance.RespawnPlayer();
+        if (player != null)
+            player.Respawn();
 
         pauseMenuUI.SetActive(false);
-
         CursorManager.Instance.SetMode(InputMode.Gameplay);
 
         isPaused = false;

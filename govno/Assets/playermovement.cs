@@ -7,6 +7,9 @@ public class TopDownPlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float rotationSpeed = 10f;
     public float gravity = -9.81f;
+    
+
+    Animator animator;
 
     CharacterController controller;
     Vector2 move;
@@ -17,6 +20,7 @@ public class TopDownPlayerMovement : MonoBehaviour
     void Awake()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     public void OnMove(InputValue value)
@@ -75,5 +79,10 @@ public class TopDownPlayerMovement : MonoBehaviour
                 rotationSpeed * Time.deltaTime
             );
         }
+
+        float speedPercent = move.magnitude;
+        animator.SetFloat("Speed", speedPercent);
+
+        animator.SetBool("IsGrounded", controller.isGrounded);
     }
 }
