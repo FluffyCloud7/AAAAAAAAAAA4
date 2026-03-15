@@ -6,10 +6,16 @@ public class DamageZone : MonoBehaviour
     public int damageAmount = 1;
     public float damageInterval = 1f;
 
-    private Coroutine damageCoroutine;
-    private PlayerHealth currentPlayer;
+    Coroutine damageCoroutine;
+    PlayerHealth currentPlayer;
+    InkPuddleMask puddle;
 
-    private void OnTriggerEnter(Collider other)
+    void Start()
+    {
+        puddle = GetComponentInParent<InkPuddleMask>();
+    }
+
+    void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
 
@@ -17,37 +23,63 @@ public class DamageZone : MonoBehaviour
         if (currentPlayer == null) return;
 
         damageCoroutine = StartCoroutine(DamageLoop());
-        currentPlayer.OnRespawn += StopDamage;
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
 
         StopDamage();
     }
 
-    private IEnumerator DamageLoop()
+    IEnumerator DamageLoop()
     {
         while (currentPlayer != null && !currentPlayer.IsDead)
         {
-            currentPlayer.TakeDamage(damageAmount);
+            if (PlayerStandingOnInk())
+                currentPlayer.TakeDamage(damageAmount);
+
             yield return new WaitForSeconds(damageInterval);
         }
     }
 
-    private void StopDamage()
+    bool PlayerStandingOnInk()
     {
-        if (damageCoroutine != null)
+        Vector3 origin = currentPlayer.transform.position;
+
+        float checkRadius = 0.35f;
+
+        Vector3[] points =
         {
-            StopCoroutine(damageCoroutine);
-            damageCoroutine = null;
+        origin,
+        origin + Vector3.forward * checkRadius,
+        origin - Vector3.forward * checkRadius,
+        origin + Vector3.right * checkRadius,
+        origin - Vector3.right * checkRadius
+    };
+
+        foreach (var p in points)
+        {
+            Ray ray = new Ray(p + Vector3.up * 0.2f, Vector3.down);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 2f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                InkPuddleMask mask = hit.collider.GetComponent<InkPuddleMask>();
+
+                if (mask != null && mask.HasInk(hit.textureCoord))
+                    return true;
+            }
         }
 
-        if (currentPlayer != null)
-        {
-            currentPlayer.OnRespawn -= StopDamage;
-            currentPlayer = null;
-        }
+        return false;
+    }
+
+    void StopDamage()
+    {
+        if (damageCoroutine != null)
+            StopCoroutine(damageCoroutine);
+
+        damageCoroutine = null;
+        currentPlayer = null;
     }
 }
