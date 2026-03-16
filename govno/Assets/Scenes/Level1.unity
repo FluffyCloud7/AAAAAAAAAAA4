@@ -20332,9 +20332,10 @@ GameObject:
   - component: {fileID: 1511914499}
   - component: {fileID: 1511914498}
   - component: {fileID: 1511914497}
-  - component: {fileID: 1511914496}
   - component: {fileID: 1511914501}
   - component: {fileID: 1511914502}
+  - component: {fileID: 1511914496}
+  - component: {fileID: 1511914503}
   m_Layer: 0
   m_Name: ink
   m_TagString: Untagged
@@ -20461,9 +20462,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44d7211f1320da7448351a4708904551, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  textureResolution: 512
+  baseTexture: {fileID: 2800000, guid: f0b0f48ce0922d04fb8366ee1cfcdd6d, type: 3}
 --- !u!64 &1511914502
 MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1511914494}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1511914503
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -20480,10 +20503,9 @@ MeshCollider:
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.0000001, z: 0.12}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1547068736
 GameObject:
   m_ObjectHideFlags: 0
@@ -22526,9 +22548,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpongeCleaner
   eraseRadius: 0.15
   rayDistance: 2
-  puddleLayer:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!1 &2033184214
 GameObject:
   m_ObjectHideFlags: 0

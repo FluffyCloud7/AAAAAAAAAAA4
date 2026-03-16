@@ -2,35 +2,44 @@ using UnityEngine;
 
 public class InkPuddleMask : MonoBehaviour
 {
-    public int textureResolution = 512;
-
     Texture2D runtimeTexture;
+    Color[] pixels;
+
     Renderer rend;
+
+    public Texture2D baseTexture;
+
+    int texWidth;
+    int texHeight;
 
     void Start()
     {
+        Debug.Log(baseTexture);
         rend = GetComponent<Renderer>();
 
-        runtimeTexture = new Texture2D(textureResolution, textureResolution, TextureFormat.RGBA32, false);
-        runtimeTexture.wrapMode = TextureWrapMode.Clamp;
+        texWidth = baseTexture.width;
+        texHeight = baseTexture.height;
 
-        Color[] pixels = new Color[textureResolution * textureResolution];
+        runtimeTexture = new Texture2D(texWidth, texHeight, TextureFormat.RGBA32, false);
+        runtimeTexture.wrapMode = TextureWrapMode.Repeat;
 
-        for (int i = 0; i < pixels.Length; i++)
-            pixels[i] = new Color(0, 0, 0, 1);
+        pixels = baseTexture.GetPixels();
 
         runtimeTexture.SetPixels(pixels);
         runtimeTexture.Apply();
 
-        rend.material.mainTexture = runtimeTexture;
+        rend.material.SetTexture("_MaskTexture", runtimeTexture);
     }
 
     public void Erase(Vector2 uv, float radius)
     {
-        int centerX = Mathf.RoundToInt(uv.x * textureResolution);
-        int centerY = Mathf.RoundToInt(uv.y * textureResolution);
+        uv.x = Mathf.Clamp01(uv.x);
+        uv.y = Mathf.Clamp01(uv.y);
 
-        int pixelRadius = Mathf.RoundToInt(radius * textureResolution);
+        int centerX = Mathf.RoundToInt(uv.x * texWidth);
+        int centerY = Mathf.RoundToInt(uv.y * texHeight);
+
+        int pixelRadius = Mathf.RoundToInt(radius * Mathf.Min(texWidth, texHeight));
 
         for (int x = -pixelRadius; x <= pixelRadius; x++)
         {
@@ -39,7 +48,7 @@ public class InkPuddleMask : MonoBehaviour
                 int px = centerX + x;
                 int py = centerY + y;
 
-                if (px < 0 || py < 0 || px >= textureResolution || py >= textureResolution)
+                if (px < 0 || py < 0 || px >= texWidth || py >= texHeight)
                     continue;
 
                 float dist = Mathf.Sqrt(x * x + y * y);
@@ -47,23 +56,30 @@ public class InkPuddleMask : MonoBehaviour
 
                 float strength = 1f - dist / pixelRadius;
 
-                Color c = runtimeTexture.GetPixel(px, py);
+                int index = py * texWidth + px;
+
+                Color c = pixels[index];
                 c.a -= strength * 0.25f;
                 c.a = Mathf.Clamp01(c.a);
 
-                runtimeTexture.SetPixel(px, py, c);
+                pixels[index] = c;
             }
         }
 
+        runtimeTexture.SetPixels(pixels);
         runtimeTexture.Apply();
     }
 
     public bool HasInk(Vector2 uv)
     {
-        int x = Mathf.RoundToInt(uv.x * textureResolution);
-        int y = Mathf.RoundToInt(uv.y * textureResolution);
+        uv.x = Mathf.Clamp01(uv.x);
+        uv.y = Mathf.Clamp01(uv.y);
 
-        Color c = runtimeTexture.GetPixel(x, y);
-        return c.a > 0.1f;
+        int x = Mathf.RoundToInt(uv.x * texWidth);
+        int y = Mathf.RoundToInt(uv.y * texHeight);
+
+        int index = y * texWidth + x;
+
+        return pixels[index].a > 0.1f;
     }
 }
