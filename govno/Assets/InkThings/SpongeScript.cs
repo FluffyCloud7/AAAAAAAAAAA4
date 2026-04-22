@@ -7,13 +7,11 @@ public class SpongeCleaner : MonoBehaviour
 
     void Update()
     {
-        Debug.DrawRay(transform.position, Vector3.down * rayDistance, Color.red);
-
         RaycastHit hit;
 
         if (Physics.Raycast(transform.position, Vector3.down, out hit, rayDistance, ~0, QueryTriggerInteraction.Ignore))
         {
-            InkPuddleMask puddle = hit.collider.GetComponent<InkPuddleMask>();
+            InkSystem puddle = hit.collider.GetComponent<InkSystem>();
 
             if (puddle != null)
                 puddle.Erase(hit.textureCoord, eraseRadius);
