@@ -4,10 +4,18 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenuUI;
-    public string mainMenuScene = "MainMenu";  // название сцены главного меню
+    public string mainMenuScene = "MainMenu";
     public PlayerHealth player;
 
     private bool isPaused = false;
+
+    public Animator pauseAnimator;
+
+    void Start()
+    {
+        // Меню начинается закрытым
+        pauseAnimator.SetBool("IsOpen", false);
+    }
 
     void Update()
     {
@@ -22,17 +30,20 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        pauseMenuUI.SetActive(false);
-        //Time.timeScale = 1f;
+        // Анимация закрытия
+        pauseAnimator.SetBool("IsOpen", false);
+
         GamePauseManager.Instance.ReleasePause();
         CursorManager.Instance.SetMode(InputMode.Gameplay);
+
         isPaused = false;
     }
 
     void Pause()
     {
-        pauseMenuUI.SetActive(true);
-        //Time.timeScale = 0f;
+        // Анимация открытия
+        pauseAnimator.SetBool("IsOpen", true);
+
         GamePauseManager.Instance.RequestPause();
         CursorManager.Instance.SetMode(InputMode.UI);
 
@@ -41,22 +52,21 @@ public class PauseMenu : MonoBehaviour
 
     public void ReturnToMenu()
     {
-        Time.timeScale = 1f;  // важно вернуть время
+        Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuScene);
     }
 
     public void ReturnToCheckpoint()
     {
+        pauseAnimator.SetBool("IsOpen", false);
+
         GamePauseManager.Instance.ReleasePause();
 
         if (player != null)
             player.Respawn();
 
-        pauseMenuUI.SetActive(false);
         CursorManager.Instance.SetMode(InputMode.Gameplay);
 
         isPaused = false;
     }
-
-
 }
