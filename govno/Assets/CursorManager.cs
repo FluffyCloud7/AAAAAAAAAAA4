@@ -94,7 +94,7 @@ public class CursorManager : MonoBehaviour
                 break;
 
             case InputMode.MouseGameplay:
-                Cursor.visible = true;
+                Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.None;
 
                 if (playerCam != null)
@@ -107,7 +107,7 @@ public class CursorManager : MonoBehaviour
 
             case InputMode.Dialogue:
             case InputMode.UI:
-                Cursor.visible = true;
+                Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.None;
                 break;
         }
