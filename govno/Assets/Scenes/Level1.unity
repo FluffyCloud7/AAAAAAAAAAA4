@@ -7327,6 +7327,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 71c81c31b5723c940b1c9a43b239cd55, type: 3}
   activatedStartColor: {r: 0.86679286, g: 0.6367924, b: 1, a: 1}
   activatedEndColor: {r: 0.514151, g: 0.5281406, b: 1, a: 1}
+  colorSwitchSpeed: 0.5
   spiralMaterial: {fileID: 2100000, guid: 5267a6a3e4db5cd47a07e8c204cc3b62, type: 2}
   moveSpeed: 0.5
   wordSpacing: 0.8
@@ -15737,6 +15738,7 @@ GameObject:
   - component: {fileID: 1413695161}
   - component: {fileID: 1413695160}
   - component: {fileID: 1413695159}
+  - component: {fileID: 1413695164}
   m_Layer: 0
   m_Name: Checkpoint2
   m_TagString: Untagged
@@ -15775,7 +15777,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -15786,7 +15788,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1413695158}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -15852,6 +15854,27 @@ Transform:
   - {fileID: 572030937}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &1413695164
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1413695158}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1425579035
 GameObject:
   m_ObjectHideFlags: 0
@@ -22680,6 +22703,7 @@ MonoBehaviour:
   activatedTextures: []
   activatedStartColor: {r: 0, g: 1, b: 0, a: 1}
   activatedEndColor: {r: 0, g: 1, b: 1, a: 1}
+  colorSwitchSpeed: 0.5
   spiralMaterial: {fileID: 2100000, guid: 5267a6a3e4db5cd47a07e8c204cc3b62, type: 2}
   moveSpeed: 1
   wordSpacing: 0.4
