@@ -10,7 +10,11 @@ public class CheckPoint2 : MonoBehaviour
 
     [Header("Ссылка на перо")]
     [Tooltip("Перетащи сюда модельку пера, на которой висит скрипт FeatherFloating")]
-    public FeatherFloating feather; // ДОБАВЛЕНО: Ссылка на скрипт пера
+    public FeatherFloating feather;
+
+    [Header("Эффекты при активации")]
+    [Tooltip("Перетащи сюда систему частиц ToTheFeather")]
+    public ParticleSystem toTheFeatherParticles; // ДОБАВЛЕНО: Ссылка на наши трейлы
 
     private void OnTriggerEnter(Collider other)
     {
@@ -34,31 +38,35 @@ public class CheckPoint2 : MonoBehaviour
             // АКТИВАЦИЯ СЖАТИЯ ПЕРА
             if (feather != null)
             {
-                feather.CollectFeather(); // ДОБАВЛЕНО: Запускаем схлопывание пера
+                feather.CollectFeather();
+            }
+
+            // ЗАПУСК СВЕТЯЩИХСЯ ЛУЧЕЙ
+            if (toTheFeatherParticles != null)
+            {
+                toTheFeatherParticles.Play(); // ДОБАВЛЕНО: Включаем трейлы один раз
             }
 
             trigger.enabled = false;
         }
     }
 
-    // ДОБАВЛЕНО: Отрисовка границ коллайдера в окне Scene для удобного центрирования пера
+    // Отрисовка границ коллайдера в окне Scene для удобного центрирования пера
     private void OnDrawGizmos()
     {
-        // Проверяем, квадратный ли коллайдер
         BoxCollider box = GetComponent<BoxCollider>();
         if (box != null)
         {
-            Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.15f); // Прозрачный желтый
+            Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.15f);
             Gizmos.DrawCube(transform.position + box.center, box.size);
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(transform.position + box.center, box.size);
         }
 
-        // Проверяем, сферический ли коллайдер
         SphereCollider sphere = GetComponent<SphereCollider>();
         if (sphere != null)
         {
-            Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.15f); // Прозрачный желтый
+            Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.15f);
             Gizmos.DrawSphere(transform.position + sphere.center, sphere.radius);
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position + sphere.center, sphere.radius);

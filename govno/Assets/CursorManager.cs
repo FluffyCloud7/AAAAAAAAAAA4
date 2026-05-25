@@ -79,6 +79,14 @@ public class CursorManager : MonoBehaviour
 
         Debug.Log("Mode switched to: " + mode);
 
+        // Используем новый быстрый метод Unity для поиска игрока на сцене
+        TopDownPlayerMovement player = Object.FindFirstObjectByType<TopDownPlayerMovement>();
+        Animator playerAnimator = null;
+        if (player != null)
+        {
+            playerAnimator = player.GetComponentInChildren<Animator>();
+        }
+
         switch (mode)
         {
             case InputMode.Gameplay:
@@ -90,6 +98,10 @@ public class CursorManager : MonoBehaviour
 
                 if (mouseCam != null)
                     mouseCam.Priority = InactivePriority;
+
+                // Если вернулись в геймплей — опускаем голову (IsLookingUp = false)
+                if (playerAnimator != null)
+                    playerAnimator.SetBool("IsLookingUp", false);
 
                 break;
 
@@ -103,12 +115,20 @@ public class CursorManager : MonoBehaviour
                 if (mouseCam != null)
                     mouseCam.Priority = ActivePriority;
 
+                // Если переключились на мышь — поднимаем голову (IsLookingUp = true)
+                if (playerAnimator != null)
+                    playerAnimator.SetBool("IsLookingUp", true);
+
                 break;
 
             case InputMode.Dialogue:
             case InputMode.UI:
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.None;
+
+                // На всякий случай выключаем взгляд вверх в диалогах и UI
+                if (playerAnimator != null)
+                    playerAnimator.SetBool("IsLookingUp", false);
                 break;
         }
     }
