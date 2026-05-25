@@ -26,8 +26,9 @@ public class PlayerHealth : MonoBehaviour
     private CharacterController characterController;
     private Animator animator; // Ссылка на Аниматор
 
-    // Ссылка на компонент эффекта растворения (добавлено для интеграции)
+    // Ссылки на компоненты эффектов растворения и появления
     private CharacterDeathEffect deathEffect;
+    private CharacterAppearEffect appearEffect; // НОВОЕ
 
     [Header("Effects Settings")]
     [SerializeField] private ParticleSystem respawnParticles; // Ссылка на партиклы для возрождения
@@ -42,8 +43,9 @@ public class PlayerHealth : MonoBehaviour
 
         playerRenderer = GetComponentInChildren<Renderer>();
 
-        // Инициализируем ссылку на эффект смерти
+        // Инициализируем ссылки на эффекты
         deathEffect = GetComponent<CharacterDeathEffect>();
+        appearEffect = GetComponent<CharacterAppearEffect>(); // НОВОЕ
     }
 
     public void TakeDamage(int amount)
@@ -111,16 +113,21 @@ public class PlayerHealth : MonoBehaviour
     {
         Debug.Log("RespawnPlayer called");
 
-        // Сброс эффекта растворения и возврат нормального материала при респавне
+        // Сброс эффекта растворения смерти
         if (deathEffect != null)
         {
             deathEffect.ResetEffect();
         }
 
+        // ЗАПУСК ЭФФЕКТА БУМАЖНОГО ПОЯВЛЕНИЯ ПРИ РЕСПАВНЕ
+        if (appearEffect != null)
+        {
+            appearEffect.PlayAppearEffect();
+        }
+
         if (respawnController.Instance != null &&
             respawnController.Instance.respawnPoint != null)
         {
-            // Исправлена опечатка в имени класса для соответствия твоему коду
             Vector3 spawnPos = respawnController.Instance.respawnPoint.position;
 
             if (characterController != null)
