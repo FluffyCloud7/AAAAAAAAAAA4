@@ -450,7 +450,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Death_Knees_State
-  m_Speed: 1
+  m_Speed: 0.7
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
@@ -504,7 +504,7 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 3
+  - m_ConditionMode: 6
     m_ConditionEvent: DeathType
     m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
@@ -520,7 +520,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1107 &-520083712496532853
 AnimatorStateMachine:
   serializedVersion: 6
@@ -535,7 +535,7 @@ AnimatorStateMachine:
     m_Position: {x: 290.81024, y: 24.050232, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -951869197885410744}
-    m_Position: {x: 530, y: 20, z: 0}
+    m_Position: {x: 260, y: -60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -2639314924080378750}
     m_Position: {x: 650, y: -260, z: 0}
@@ -934,7 +934,7 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 3
+  - m_ConditionMode: 6
     m_ConditionEvent: DeathType
     m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
@@ -950,7 +950,7 @@ AnimatorStateTransition:
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  m_CanTransitionToSelf: 0
 --- !u!1101 &6071568182030816766
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
