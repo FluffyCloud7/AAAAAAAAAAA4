@@ -23,10 +23,19 @@ public class TopDownPlayerMovement : MonoBehaviour
 
     Vector3 currentHorizontalVelocity;        // НОВОЕ
 
+    // Ссылка на скрипт здоровья для проверки состояния смерти
+    private PlayerHealth playerHealth;
+
     void Awake()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+    }
+
+    void Start()
+    {
+        // Безопасно ищем компонент здоровья на этом же объекте игрока
+        playerHealth = GetComponent<PlayerHealth>();
     }
 
     public void OnMove(InputValue value)
@@ -41,7 +50,9 @@ public class TopDownPlayerMovement : MonoBehaviour
 
     void Update()
     {
-        bool canControl = CursorManager.Instance.CurrentMode == InputMode.Gameplay;
+        // Игрок может управлять, только если геймплейный режим И персонаж не мертв
+        bool isDead = playerHealth != null && playerHealth.IsDead;
+        bool canControl = CursorManager.Instance.CurrentMode == InputMode.Gameplay && !isDead;
 
         Vector3 inputDir = Vector3.zero;
 
