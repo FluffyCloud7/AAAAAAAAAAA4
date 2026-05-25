@@ -24,7 +24,13 @@ public class PlayerHealth : MonoBehaviour
 
     private Collider playerCollider;
     private CharacterController characterController;
-    private Animator animator; // Добавлено: Ссылка на Аниматор
+    private Animator animator; // Ссылка на Аниматор
+
+    // Ссылка на компонент эффекта растворения (добавлено для интеграции)
+    private CharacterDeathEffect deathEffect;
+
+    [Header("Effects Settings")]
+    [SerializeField] private ParticleSystem respawnParticles; // Ссылка на партиклы для возрождения
 
     private void Start()
     {
@@ -32,9 +38,12 @@ public class PlayerHealth : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         playerCollider = GetComponent<Collider>();
         characterController = GetComponent<CharacterController>();
-        animator = GetComponentInChildren<Animator>(); // Добавлено: Ищем аниматор
+        animator = GetComponentInChildren<Animator>(); // Ищем аниматор
 
         playerRenderer = GetComponentInChildren<Renderer>();
+
+        // Инициализируем ссылку на эффект смерти
+        deathEffect = GetComponent<CharacterDeathEffect>();
     }
 
     public void TakeDamage(int amount)
@@ -81,6 +90,12 @@ public class PlayerHealth : MonoBehaviour
             animator.SetInteger("DeathType", deathType);
         }
 
+        // Запуск бумажного растворения при смерти
+        if (deathEffect != null)
+        {
+            deathEffect.PlayDeathEffect();
+        }
+
         OnDeath?.Invoke();
 
         StartCoroutine(RespawnAfterDelay(respawnDelay));
@@ -95,9 +110,17 @@ public class PlayerHealth : MonoBehaviour
     public void Respawn()
     {
         Debug.Log("RespawnPlayer called");
+
+        // Сброс эффекта растворения и возврат нормального материала при респавне
+        if (deathEffect != null)
+        {
+            deathEffect.ResetEffect();
+        }
+
         if (respawnController.Instance != null &&
             respawnController.Instance.respawnPoint != null)
         {
+            // Исправлена опечатка в имени класса для соответствия твоему коду
             Vector3 spawnPos = respawnController.Instance.respawnPoint.position;
 
             if (characterController != null)
@@ -111,6 +134,12 @@ public class PlayerHealth : MonoBehaviour
                 transform.position = spawnPos;
             }
             OnRespawn?.Invoke();
+        }
+
+        // Включаем систему частиц в момент появления на точке спавна
+        if (respawnParticles != null)
+        {
+            respawnParticles.Play();
         }
 
         // Логика возрождения для Аниматора
@@ -131,7 +160,7 @@ public class PlayerHealth : MonoBehaviour
         StartCoroutine(Invulnerability());
     }
 
-    // ВОЗВРАЩЕНО КАК В ОРИГИНАЛЕ: это IEnumerator, теперь Unity его видит
+    // IEnumerator виден для Unity
     private IEnumerator Invulnerability()
     {
         isInvulnerable = true;
