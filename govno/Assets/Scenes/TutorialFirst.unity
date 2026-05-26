@@ -6124,6 +6124,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorVisualController
   triangleCursor: {fileID: 1393171398}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  interactableColor: {r: 0.3873129, g: 0, b: 1, a: 1}
+  normalSprite: {fileID: 21300000, guid: 0dc2d47ee2e7bce4e95d5beb88513bd6, type: 3}
+  interactableSprite: {fileID: 21300000, guid: 0dc2d47ee2e7bce4e95d5beb88513bd6, type: 3}
   cursorRoot: {fileID: 1338156888}
 --- !u!4 &239589236
 Transform:
@@ -39816,7 +39820,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -24.15398, y: -28.26, z: 16.21}
-  m_LocalScale: {x: 300, y: 50, z: 300}
+  m_LocalScale: {x: 8000, y: 50, z: 8000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -46103,11 +46107,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cc43ca7ab30a0e0459997c6e02be9c6d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 37.9
+      value: 47.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cc43ca7ab30a0e0459997c6e02be9c6d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -21
+      value: -14.13
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cc43ca7ab30a0e0459997c6e02be9c6d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -54096,7 +54100,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1922884939}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b431b7f8a4f7d8b4d9ebd99478e9d1f2, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -54108,7 +54112,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.68, y: 1.73, z: 2.2}
+  m_Size: {x: 2.04, y: 2.05, z: 2.02}
   m_Center: {x: 0, y: 1.05, z: 0}
 --- !u!23 &1922884942
 MeshRenderer:
@@ -54175,13 +54179,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1922884939}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.022641316, y: -0.5791309, z: 0.2863603, w: 0.76295}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 19.714582, y: 0.6090786, z: -15.40066}
   m_LocalScale: {x: 0.78, y: 0.78, z: 0.78}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 162.715, y: -1329.897, z: 209.018}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1922884945
 MonoBehaviour:
   m_ObjectHideFlags: 0
