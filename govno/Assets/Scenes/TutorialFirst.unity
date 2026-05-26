@@ -6123,7 +6123,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5f5015ff3f955e4fbac1893b83d5174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorVisualController
-  birdCursor: {fileID: 2098292497}
   triangleCursor: {fileID: 1393171398}
   cursorRoot: {fileID: 1338156888}
 --- !u!4 &239589236
@@ -40506,7 +40505,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -47858,7 +47857,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1726562775}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -16.37, y: 2.32, z: 6.1699}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -47868,7 +47867,7 @@ Transform:
   - {fileID: 1013470946}
   - {fileID: 1581995694}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!65 &1726562779
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -54833,7 +54832,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -54874,7 +54873,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2098292498
 RectTransform:
   m_ObjectHideFlags: 0

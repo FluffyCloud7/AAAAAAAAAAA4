@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using Cinemachine;
 
+// Твой оригинальный enum, который используют все остальные системы в игре
 public enum InputMode
 {
     Gameplay,
@@ -95,7 +96,7 @@ public class CursorManager : MonoBehaviour
         {
             case InputMode.Gameplay:
                 Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.lockState = CursorLockMode.Locked; // Запираем мышь по центру для управления персонажем
 
                 SetCameraPriority(dynamicPlayerCam, ActivePriority);
                 SetCameraPriority(dynamicMouseCam, InactivePriority);
@@ -103,17 +104,15 @@ public class CursorManager : MonoBehaviour
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", false);
 
-                // ХИТ: Прячем птицу, когда возвращаемся в обычный геймплей
                 if (BirdFollowMouse.Instance != null)
                 {
                     BirdFollowMouse.Instance.HideBird();
                 }
-
                 break;
 
             case InputMode.MouseGameplay:
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = false; // СКРЫВАЕМ белую стрелку ОС
+                Cursor.lockState = CursorLockMode.None; // Но разрешаем мыши двигаться, чтобы перемещать треугольник
 
                 SetCameraPriority(dynamicPlayerCam, InactivePriority);
                 SetCameraPriority(dynamicMouseCam, ActivePriority);
@@ -121,23 +120,20 @@ public class CursorManager : MonoBehaviour
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", true);
 
-                // ХИТ: Показываем птицу, когда игрок перешел в режим мыши на R
                 if (BirdFollowMouse.Instance != null)
                 {
                     BirdFollowMouse.Instance.ShowBird();
                 }
-
                 break;
 
             case InputMode.Dialogue:
             case InputMode.UI:
-                Cursor.visible = true;
+                Cursor.visible = false; // СКРЫВАЕМ белую стрелку ОС в диалогах и меню!
                 Cursor.lockState = CursorLockMode.None;
 
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", false);
 
-                // На всякий случай прячем птицу в диалогах и интерфейсах меню
                 if (BirdFollowMouse.Instance != null)
                 {
                     BirdFollowMouse.Instance.HideBird();
