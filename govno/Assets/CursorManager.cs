@@ -27,11 +27,9 @@ public class CursorManager : MonoBehaviour
 
     public InputMode CurrentMode { get; private set; }
 
-    // Вставь вместо них вот это:
     private CinemachineVirtualCameraBase playerCam;
     private CinemachineVirtualCameraBase mouseCam;
 
-    // В старых версиях Cinemachine лучшая совместимость через базовый компонент:
     private MonoBehaviour dynamicPlayerCam;
     private MonoBehaviour dynamicMouseCam;
 
@@ -68,7 +66,6 @@ public class CursorManager : MonoBehaviour
         dynamicPlayerCam = null;
         dynamicMouseCam = null;
 
-        // Находим вообще все Cinemachine камеры на сцене (и обычные, и FreeLook)
         var allCams = FindObjectsByType<CinemachineVirtualCameraBase>(FindObjectsSortMode.None);
 
         foreach (var cam in allCams)
@@ -97,7 +94,6 @@ public class CursorManager : MonoBehaviour
         switch (mode)
         {
             case InputMode.Gameplay:
-                // Блокируем мышь в центре экрана для управления обзором от 3-го лица
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
 
@@ -107,10 +103,15 @@ public class CursorManager : MonoBehaviour
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", false);
 
+                // ХИТ: Прячем птицу, когда возвращаемся в обычный геймплей
+                if (BirdFollowMouse.Instance != null)
+                {
+                    BirdFollowMouse.Instance.HideBird();
+                }
+
                 break;
 
             case InputMode.MouseGameplay:
-                // ВКЛЮЧАЕМ курсор, чтобы игрок мог вырезать и двигать предметы на R
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
 
@@ -120,20 +121,31 @@ public class CursorManager : MonoBehaviour
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", true);
 
+                // ХИТ: Показываем птицу, когда игрок перешел в режим мыши на R
+                if (BirdFollowMouse.Instance != null)
+                {
+                    BirdFollowMouse.Instance.ShowBird();
+                }
+
                 break;
 
             case InputMode.Dialogue:
             case InputMode.UI:
-                Cursor.visible = true; // Для UI и диалогов курсор тоже должен быть виден
+                Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
 
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", false);
+
+                // На всякий случай прячем птицу в диалогах и интерфейсах меню
+                if (BirdFollowMouse.Instance != null)
+                {
+                    BirdFollowMouse.Instance.HideBird();
+                }
                 break;
         }
     }
 
-    // Вспомогательный метод безопасной смены приоритета у любого типа камеры
     private void SetCameraPriority(MonoBehaviour cam, int priority)
     {
         if (cam == null) return;
