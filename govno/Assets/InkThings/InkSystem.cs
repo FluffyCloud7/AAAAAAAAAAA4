@@ -7,18 +7,24 @@ public class InkSystem : MonoBehaviour
     public RenderTexture inkMask;
 
     [Header("Финальный Слот для Шейдера")]
-    [Tooltip("Перетащи сюда файл нового шейдера InkRegen")]
     public Shader regenShader;
 
     [Header("Настройки автоматического восстановления")]
     public bool autoRegenerate = true;
-    [Range(0f, 1f)]
-    public float fieldsRegenSpeed = 0.05f;
+
+    [Tooltip("Время задержки в секундах после последнего стирания перед тем, как чернила начнут течь назад")]
+    public float regenDelay = 2.0f;
+
+    [Tooltip("Скорость БЫСТРОГО стягивания чернил после того, как время ожидания вышло")]
+    public float fastRegenSpeed = 0.4f;
 
     Renderer rend;
     private Material regenMat;
     private Material eraseMat;
     private RenderTextureFormat maskFormat = RenderTextureFormat.R8;
+
+    // Таймер для отсчета задержки
+    private float delayTimer = 0f;
 
     void Start()
     {
@@ -39,10 +45,6 @@ public class InkSystem : MonoBehaviour
         {
             regenMat = new Material(regenShader);
         }
-        else
-        {
-            Debug.LogError("[InkSystem] Слот 'Regen Shader' пуст! Перетащи туда шейдер!");
-        }
 
         Shader eShader = Shader.Find("Hidden/InkErase");
         if (eShader != null)
@@ -53,15 +55,24 @@ public class InkSystem : MonoBehaviour
 
     void Update()
     {
-        if (autoRegenerate && inkMask != null && regenMat != null)
+        if (!autoRegenerate || inkMask == null || regenMat == null) return;
+
+        // Если таймер еще тикает, уменьшаем его и НЕ восстанавливаем чернила
+        if (delayTimer > 0f)
         {
+            delayTimer -= Time.deltaTime;
+        }
+        else
+        {
+            // Таймер закончился — чернила начинают БЫСТРО стягиваться обратно
             RegenerateInk();
         }
     }
 
     private void RegenerateInk()
     {
-        regenMat.SetFloat("_RegenSpeed", fieldsRegenSpeed * Time.deltaTime);
+        // Передаем нашу новую высокую скорость в шейдер
+        regenMat.SetFloat("_RegenSpeed", fastRegenSpeed * Time.deltaTime);
 
         RenderTexture temp = RenderTexture.GetTemporary(inkMask.width, inkMask.height, 0, maskFormat, RenderTextureReadWrite.Linear);
         Graphics.Blit(inkMask, temp);
@@ -69,8 +80,12 @@ public class InkSystem : MonoBehaviour
         RenderTexture.ReleaseTemporary(temp);
     }
 
+    // ТВОЙ МЕТОД СТИРАНИЯ (ДОБАВЛЕН СБРОС ТАЙМЕРА)
     public void Erase(Vector2 uv, float radius)
     {
+        // КАК ТОЛЬКО ГУБКА ТРЕТ ЛУЖУ — МЫ СБРАСЫВАЕМ ТАЙМЕР ЗАДЕРЖКИ ЗАЗАНОВО!
+        delayTimer = regenDelay;
+
         if (eraseMat == null) return;
 
         eraseMat.SetVector("_ErasePos", new Vector4(uv.x, uv.y, radius, 0));
