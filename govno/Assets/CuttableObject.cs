@@ -27,7 +27,6 @@ public class CuttableShape : MonoBehaviour
 
     private void Update()
     {
-        // Рисуем хвост линии, только если мы начали резать и кнопка зажата
         if (!completed && lastVisitedIndex != -1 && Input.GetMouseButton(0))
         {
             UpdateTrailingLine();
@@ -44,10 +43,28 @@ public class CuttableShape : MonoBehaviour
         lineRenderer.SetPosition(visitedCount, worldMousePos);
     }
 
-    // Сообщаем менеджеру о форме при наведении
+    // Сообщаем менеджеру о форме при наведении и меняем цвет курсора
     private void OnMouseEnter()
     {
-        if (!completed) CutManager.Instance.StartCut(this);
+        if (!completed)
+        {
+            CutManager.Instance.StartCut(this);
+
+            // ПОДСВЕЧИВАЕМ КУРСОР
+            if (CursorVisualController.Instance != null)
+            {
+                CursorVisualController.Instance.SetInteractableState(true);
+            }
+        }
+    }
+
+    // ВОЗВРАЩАЕМ ЦВЕТ КУРСОРУ, когда мышь ушла с объекта
+    private void OnMouseExit()
+    {
+        if (CursorVisualController.Instance != null)
+        {
+            CursorVisualController.Instance.SetInteractableState(false);
+        }
     }
 
     public void VisitPoint(CutPoint point)
@@ -111,7 +128,6 @@ public class CuttableShape : MonoBehaviour
         lineRenderer.SetPosition(visitedCount - 1, point.transform.position);
     }
 
-    // ПОЛНЫЙ СБРОС (вызывается из менеджера при отжатии кнопки)
     public void ResetProgress()
     {
         if (completed) return;
@@ -123,7 +139,7 @@ public class CuttableShape : MonoBehaviour
 
         foreach (var point in points)
         {
-            point.ResetPoint(); // Убедись, что этот метод есть в CutPoint
+            point.ResetPoint();
         }
 
         if (lineRenderer != null) lineRenderer.positionCount = 0;
@@ -136,6 +152,12 @@ public class CuttableShape : MonoBehaviour
         completed = true;
         lineRenderer.positionCount = visitedCount + 1;
         lineRenderer.SetPosition(visitedCount, startPoint.transform.position);
+
+        // Перед уничтожением объекта гасим подсветку курсора, чтобы он не залип
+        if (CursorVisualController.Instance != null)
+        {
+            CursorVisualController.Instance.SetInteractableState(false);
+        }
 
         Instantiate(resultPrefab, spawnPoint != null ? spawnPoint.position : transform.position + Vector3.right * 2f, Quaternion.identity);
         Destroy(gameObject);
