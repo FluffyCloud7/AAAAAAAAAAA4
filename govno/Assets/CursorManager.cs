@@ -27,8 +27,13 @@ public class CursorManager : MonoBehaviour
 
     public InputMode CurrentMode { get; private set; }
 
-    private CinemachineVirtualCamera playerCam;
-    private CinemachineVirtualCamera mouseCam;
+    // Вставь вместо них вот это:
+    private CinemachineVirtualCameraBase playerCam;
+    private CinemachineVirtualCameraBase mouseCam;
+
+    // В старых версиях Cinemachine лучшая совместимость через базовый компонент:
+    private MonoBehaviour dynamicPlayerCam;
+    private MonoBehaviour dynamicMouseCam;
 
     private const int ActivePriority = 20;
     private const int InactivePriority = 10;
@@ -50,7 +55,7 @@ public class CursorManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         FindCamerasInScene();
-        SetMode(CurrentMode); // восстанавливаем режим после загрузки
+        SetMode(CurrentMode);
     }
 
     private void Start()
@@ -60,18 +65,21 @@ public class CursorManager : MonoBehaviour
 
     private void FindCamerasInScene()
     {
-        var cams = FindObjectsByType<CinemachineVirtualCamera>(FindObjectsSortMode.None);
+        dynamicPlayerCam = null;
+        dynamicMouseCam = null;
 
-        foreach (var cam in cams)
+        // Находим вообще все Cinemachine камеры на сцене (и обычные, и FreeLook)
+        var allCams = FindObjectsByType<CinemachineVirtualCameraBase>(FindObjectsSortMode.None);
+
+        foreach (var cam in allCams)
         {
             if (cam.name.Contains("Player"))
-                playerCam = cam;
+                dynamicPlayerCam = cam;
 
             if (cam.name.Contains("Mouse"))
-                mouseCam = cam;
+                dynamicMouseCam = cam;
         }
     }
-
 
     public void SetMode(InputMode mode)
     {
@@ -79,7 +87,6 @@ public class CursorManager : MonoBehaviour
 
         Debug.Log("Mode switched to: " + mode);
 
-        // Используем новый быстрый метод Unity для поиска игрока на сцене
         TopDownPlayerMovement player = Object.FindFirstObjectByType<TopDownPlayerMovement>();
         Animator playerAnimator = null;
         if (player != null)
@@ -90,32 +97,26 @@ public class CursorManager : MonoBehaviour
         switch (mode)
         {
             case InputMode.Gameplay:
+                // Блокируем мышь в центре экрана для управления обзором от 3-го лица
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
 
-                if (playerCam != null)
-                    playerCam.Priority = ActivePriority;
+                SetCameraPriority(dynamicPlayerCam, ActivePriority);
+                SetCameraPriority(dynamicMouseCam, InactivePriority);
 
-                if (mouseCam != null)
-                    mouseCam.Priority = InactivePriority;
-
-                // Если вернулись в геймплей — опускаем голову (IsLookingUp = false)
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", false);
 
                 break;
 
             case InputMode.MouseGameplay:
-                Cursor.visible = false;
+                // ВКЛЮЧАЕМ курсор, чтобы игрок мог вырезать и двигать предметы на R
+                Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
 
-                if (playerCam != null)
-                    playerCam.Priority = InactivePriority;
+                SetCameraPriority(dynamicPlayerCam, InactivePriority);
+                SetCameraPriority(dynamicMouseCam, ActivePriority);
 
-                if (mouseCam != null)
-                    mouseCam.Priority = ActivePriority;
-
-                // Если переключились на мышь — поднимаем голову (IsLookingUp = true)
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", true);
 
@@ -123,13 +124,27 @@ public class CursorManager : MonoBehaviour
 
             case InputMode.Dialogue:
             case InputMode.UI:
-                Cursor.visible = false;
+                Cursor.visible = true; // Для UI и диалогов курсор тоже должен быть виден
                 Cursor.lockState = CursorLockMode.None;
 
-                // На всякий случай выключаем взгляд вверх в диалогах и UI
                 if (playerAnimator != null)
                     playerAnimator.SetBool("IsLookingUp", false);
                 break;
+        }
+    }
+
+    // Вспомогательный метод безопасной смены приоритета у любого типа камеры
+    private void SetCameraPriority(MonoBehaviour cam, int priority)
+    {
+        if (cam == null) return;
+
+        if (cam is CinemachineVirtualCamera vCam)
+        {
+            vCam.Priority = priority;
+        }
+        else if (cam is CinemachineFreeLook freeLookCam)
+        {
+            freeLookCam.Priority = priority;
         }
     }
 
