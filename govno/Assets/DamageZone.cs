@@ -8,6 +8,9 @@ public class DamageZone : MonoBehaviour
 
     Coroutine damageCoroutine;
     PlayerHealth currentPlayer;
+
+    // МЫ НЕ УДАЛЯЕМ эту переменную, чтобы не сломать зависимости, если они где-то есть,
+    // но теперь нам важнее найти InkSystem на этом же объекте.
     InkPuddleMask puddle;
 
     void Start()
@@ -46,17 +49,16 @@ public class DamageZone : MonoBehaviour
     bool PlayerStandingOnInk()
     {
         Vector3 origin = currentPlayer.transform.position;
-
         float checkRadius = 0.35f;
 
         Vector3[] points =
         {
-        origin,
-        origin + Vector3.forward * checkRadius,
-        origin - Vector3.forward * checkRadius,
-        origin + Vector3.right * checkRadius,
-        origin - Vector3.right * checkRadius
-    };
+            origin,
+            origin + Vector3.forward * checkRadius,
+            origin - Vector3.forward * checkRadius,
+            origin + Vector3.right * checkRadius,
+            origin - Vector3.right * checkRadius
+        };
 
         foreach (var p in points)
         {
@@ -64,10 +66,23 @@ public class DamageZone : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, 2f, ~0, QueryTriggerInteraction.Ignore))
             {
-                InkPuddleMask mask = hit.collider.GetComponent<InkPuddleMask>();
+                // ИСПРАВЛЕНИЕ: Вместо InkPuddleMask ищем InkSystem, которую стирает губка
+                InkSystem inkSys = hit.collider.GetComponent<InkSystem>();
 
-                if (mask != null && mask.HasInk(hit.textureCoord))
-                    return true;
+                if (inkSys != null)
+                {
+                    // Проверяем реальную маску, изменённую губкой
+                    if (inkSys.HasInk(hit.textureCoord))
+                        return true;
+                }
+                else
+                {
+                    // На всякий случай (резервный вариант): если InkSystem вдруг нет, 
+                    // проверяем старый InkPuddleMask, чтобы ничего не отвалилось
+                    InkPuddleMask mask = hit.collider.GetComponent<InkPuddleMask>();
+                    if (mask != null && mask.HasInk(hit.textureCoord))
+                        return true;
+                }
             }
         }
 
@@ -82,5 +97,4 @@ public class DamageZone : MonoBehaviour
         damageCoroutine = null;
         currentPlayer = null;
     }
-
 }
