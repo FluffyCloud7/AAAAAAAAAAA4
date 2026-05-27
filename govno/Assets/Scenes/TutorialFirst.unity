@@ -46990,6 +46990,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InkSystem2
   resolution: 512
   inkMask: {fileID: 0}
+  regenShader: {fileID: 4800000, guid: 13d3bc82d9cea6742af080b9a64d77e0, type: 3}
+  autoRegenerate: 1
+  regenDelay: 2
+  fastRegenSpeed: 0.4
 --- !u!1 &1547068736
 GameObject:
   m_ObjectHideFlags: 0
