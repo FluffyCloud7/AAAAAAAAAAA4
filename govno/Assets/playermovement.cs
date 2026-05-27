@@ -8,26 +8,22 @@ public class TopDownPlayerMovement : MonoBehaviour
     public float moveSpeed = 7f;
     public float rotationSpeed = 12f;
 
-    public float gravity = -30f;              // сильнее обычной
-    public float fallMultiplier = 2f;         // ускоренное падение
-    public float acceleration = 60f;          // разгон
-    public float deceleration = 70f;          // торможение
-    public float airControl = 0.6f;           // контроль в воздухе
+    public float gravity = -30f;
+    public float fallMultiplier = 2f;
+    public float acceleration = 60f;
+    public float deceleration = 70f;
+    public float airControl = 0.6f;
 
     Animator animator;
-
     CharacterController controller;
-    Vector2 move;
+    Vector2 moveInput;
     float verticalVelocity;
 
     private MovingPlatform currentPlatform;
-
     Vector3 currentHorizontalVelocity;
+    Vector3 inputDir;
 
-    // Ссылка на скрипт здоровья для проверки состояния смерти
     private PlayerHealth playerHealth;
-
-    // Ссылка на главную камеру для вычисления направления движения
     private Transform mainCameraTransform;
 
     void Awake()
@@ -39,17 +35,12 @@ public class TopDownPlayerMovement : MonoBehaviour
     void Start()
     {
         playerHealth = GetComponent<PlayerHealth>();
-
-        // Находим главную камеру на сцене при старте
-        if (Camera.main != null)
-        {
-            mainCameraTransform = Camera.main.transform;
-        }
+        if (Camera.main != null) mainCameraTransform = Camera.main.transform;
     }
 
     public void OnMove(InputValue value)
     {
-        move = value.Get<Vector2>();
+        moveInput = value.Get<Vector2>();
     }
 
     public void SetVerticalVelocity(float value)
@@ -59,75 +50,96 @@ public class TopDownPlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Игрок может управлять, только если геймплейный режим И персонаж не мертв
         bool isDead = playerHealth != null && playerHealth.IsDead;
         bool canControl = CursorManager.Instance.CurrentMode == InputMode.Gameplay && !isDead;
 
-        Vector3 inputDir = Vector3.zero;
-
-        // Расчет направления движения относительно камеры (Идеальный вариант для 3D платформиров)
-        if (canControl && move != Vector2.zero && mainCameraTransform != null)
+        if (canControl && moveInput != Vector2.zero && mainCameraTransform != null)
         {
-            // Берем чистые направления камеры
             Vector3 camForward = mainCameraTransform.forward;
             Vector3 camRight = mainCameraTransform.right;
-
-            // ЖЕСТКО обнуляем Y составляющую, чтобы наклон камеры вообще не влиял на WASD
             camForward.y = 0f;
             camRight.y = 0f;
-
-            // Нормализуем очищенные от вертикали векторы
             camForward.Normalize();
             camRight.Normalize();
-
-            // Считаем итоговое направление движения в горизонтальной проекции
-            inputDir = (camForward * move.y + camRight * move.x).normalized;
+            inputDir = (camForward * moveInput.y + camRight * moveInput.x).normalized;
+        }
+        else
+        {
+            inputDir = Vector3.zero;
         }
 
-        // ---------- ГОРИЗОНТАЛЬНОЕ ДВИЖЕНИЕ (ПЛАВНОЕ) ----------
-
-        float control = controller.isGrounded ? 1f : airControl;
-
-        Vector3 targetVelocity = (move != Vector2.zero && canControl) ? inputDir * moveSpeed * control : Vector3.zero;
-
-        if (move != Vector2.zero && canControl)
+        if (canControl && moveInput != Vector2.zero && inputDir != Vector3.zero)
         {
-            currentHorizontalVelocity = Vector3.MoveTowards(
-                currentHorizontalVelocity,
-                targetVelocity,
-                acceleration * Time.deltaTime
-            );
+            Quaternion targetRotation = Quaternion.LookRotation(inputDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+
+        float animationSpeedValue = 0f;
+        if (canControl && moveInput != Vector2.zero)
+        {
+            animationSpeedValue = Mathf.Round(currentHorizontalVelocity.magnitude * 100f) / 100f;
+        }
+        animator.SetFloat("Speed", animationSpeedValue);
+        animator.SetBool("IsGrounded", controller.isGrounded);
+
+        if (mainCameraTransform != null)
+        {
+            CinemachineFreeLook freeLook = mainCameraTransform.GetComponentInParent<CinemachineFreeLook>();
+            if (freeLook != null)
+            {
+                bool isMoving = moveInput != Vector2.zero && canControl;
+                float mouseX = Mouse.current.delta.x.ReadValue();
+
+                if (isMoving && Mathf.Abs(mouseX) < 0.01f)
+                {
+                    float targetHeading = transform.eulerAngles.y - 180f;
+                    float currentHeading = freeLook.m_XAxis.Value;
+                    float deltaAngle = Mathf.DeltaAngle(currentHeading, targetHeading);
+                    freeLook.m_XAxis.m_InputAxisValue = Mathf.Lerp(0f, deltaAngle, 1.5f * Time.deltaTime);
+                }
+                else
+                {
+                    freeLook.m_XAxis.m_InputAxisValue = mouseX;
+                }
+            }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        bool isDead = playerHealth != null && playerHealth.IsDead;
+        bool canControl = CursorManager.Instance.CurrentMode == InputMode.Gameplay && !isDead;
+
+        // ---------- ГОРИЗОНТАЛЬНОЕ ДВИЖЕНИЕ ----------
+        float control = controller.isGrounded ? 1f : airControl;
+        Vector3 targetVelocity = (moveInput != Vector2.zero && canControl) ? inputDir * moveSpeed * control : Vector3.zero;
+
+        if (moveInput != Vector2.zero && canControl)
+        {
+            currentHorizontalVelocity = Vector3.MoveTowards(currentHorizontalVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
         }
         else
         {
             float decel = controller.isGrounded ? deceleration : deceleration * 0.3f;
-
-            currentHorizontalVelocity = Vector3.MoveTowards(
-                currentHorizontalVelocity,
-                Vector3.zero,
-                decel * Time.deltaTime
-            );
+            currentHorizontalVelocity = Vector3.MoveTowards(currentHorizontalVelocity, Vector3.zero, decel * Time.fixedDeltaTime);
         }
 
         // ---------- ГРАВИТАЦИЯ ----------
-
         if (controller.isGrounded && verticalVelocity < 0)
-            verticalVelocity = -2f;
+            verticalVelocity = -4f; // Чуть сильнее прижимаем к полу
 
         if (verticalVelocity < 0)
-            verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
+            verticalVelocity += gravity * fallMultiplier * Time.fixedDeltaTime;
         else
-            verticalVelocity += gravity * Time.deltaTime;
+            verticalVelocity += gravity * Time.fixedDeltaTime;
 
-        // ---------- ПЛАТФОРМА ----------
+        // ---------- ОБНАРУЖЕНИЕ ПЛАТФОРМЫ ----------
+        RaycastHit hit;
+        float rayLength = (controller.height * 0.5f) + 0.5f;
 
-        if (controller.isGrounded)
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, rayLength))
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f))
-            {
-                currentPlatform = hit.collider.GetComponentInParent<MovingPlatform>();
-            }
+            currentPlatform = hit.collider.GetComponentInParent<MovingPlatform>();
         }
         else
         {
@@ -135,78 +147,26 @@ public class TopDownPlayerMovement : MonoBehaviour
         }
 
         Vector3 platformMovement = Vector3.zero;
-
         if (currentPlatform != null)
+        {
             platformMovement = currentPlatform.DeltaMovement;
+        }
 
-        // ---------- MOVE ----------
-
+        // ---------- ФИНАЛЬНОЕ ПЕРЕМЕЩЕНИЕ ----------
         Vector3 finalVelocity = currentHorizontalVelocity;
         finalVelocity.y = verticalVelocity;
 
-        controller.Move(finalVelocity * Time.deltaTime + platformMovement);
+        // Сначала перемещаем контроллер на его собственную скорость
+        controller.Move(finalVelocity * Time.fixedDeltaTime);
 
-        // ---------- ПОВОРОТ ----------
-
-        if (canControl && move != Vector2.zero && inputDir != Vector3.zero)
+        // ЖЕСТКИЙ ХАК ДЛЯ CHARACTER CONTROLLER:
+        // Если мы стоим на платформе, после выполнения собственного движения мы принудительно 
+        // дотягиваем трансформ персонажа за дельтой платформы в обход коллизий контроллера.
+        if (currentPlatform != null)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(inputDir);
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                rotationSpeed * Time.deltaTime
-            );
-        }
-
-        // ---------- АНИМАЦИЯ ----------
-
-        float animationSpeedValue = 0f;
-
-        if (canControl && move != Vector2.zero)
-        {
-            // Берем реальную скорость, но математически округляем её до 2 знаков после запятой,
-            // чтобы отрезать микро-колебания от вращения камеры, которые ломали аниматор.
-            animationSpeedValue = Mathf.Round(currentHorizontalVelocity.magnitude * 100f) / 100f;
-        }
-
-        // Передаем честное и стабильное значение скорости
-        animator.SetFloat("Speed", animationSpeedValue);
-        animator.SetBool("IsGrounded", controller.isGrounded);
-
-
-        // ---------- ЧЕСТНЫЙ АВТО-ВОЗВРАТ КАМЕРЫ КОДОМ ----------
-        if (mainCameraTransform != null)
-        {
-            CinemachineFreeLook freeLook = mainCameraTransform.GetComponentInParent<CinemachineFreeLook>();
-
-            if (freeLook != null)
-            {
-                bool isMoving = move != Vector2.zero && canControl;
-                float mouseX = Mouse.current.delta.x.ReadValue();
-
-                // Если игрок бежит, но не трогает мышь
-                if (isMoving && Mathf.Abs(mouseX) < 0.01f)
-                {
-                    // Считаем разницу между углом персонажа (его затылком) и текущим углом камеры
-                    // Вычитаем 180, так как моделька в Блендере настроена по Y
-                    float targetHeading = transform.eulerAngles.y - 180f;
-                    float currentHeading = freeLook.m_XAxis.Value;
-
-                    // Вычисляем кратчайший путь поворота
-                    float deltaAngle = Mathf.DeltaAngle(currentHeading, targetHeading);
-
-                    // ТЕСТОВЫЙ ЛОГ: Выводит углы в консоль для проверки работы
-                    // Debug.Log($"Cam: {currentHeading:F1}, Target: {targetHeading:F1}, Delta: {deltaAngle:F1}");
-
-                    // Имитируем искусственный "ввод мыши" прямо в ось, обходя блокировку Cinemachine
-                    freeLook.m_XAxis.m_InputAxisValue = Mathf.Lerp(0f, deltaAngle, 1.5f * Time.deltaTime);
-                }
-                else
-                {
-                    // Если игрок тронул мышь — полностью возвращаем управление ему
-                    freeLook.m_XAxis.m_InputAxisValue = mouseX;
-                }
-            }
+            controller.enabled = false; // Выключаем на долю миллисекунды, чтобы не было сопротивления физики
+            transform.position += platformMovement;
+            controller.enabled = true;  // Включаем обратно
         }
     }
 }

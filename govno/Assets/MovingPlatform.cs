@@ -1,101 +1,45 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class MovingPlatform : MonoBehaviour
 {
-    [Header("Path Settings")]
-    [SerializeField] private Vector3[] localPoints;
-    [SerializeField] private bool loop = true;
-    [SerializeField] private bool pingPong = false;
-
     [Header("Movement Settings")]
+    [SerializeField] private Vector3 movementDirection = Vector3.up;
+    [SerializeField] private float distance = 4f;
     [SerializeField] private float speed = 2f;
-    [SerializeField] private float waitTimeAtPoint = 0f;
 
-    private int currentIndex = 0;
-    private int direction = 1;
-    private float waitTimer;
-    private Vector3[] worldPoints;
+    private Rigidbody rb;
+    private Vector3 startPosition;
 
+    // Считаем позицию глобально
+    public Vector3 TargetPosition { get; private set; }
     public Vector3 DeltaMovement { get; private set; }
 
-    private Vector3 lastPosition;
-    //Это для characterMovement
-
-    private void Start()
+    void Awake()
     {
-        lastPosition = transform.position;
-        worldPoints = new Vector3[localPoints.Length];
-        for (int i = 0; i < localPoints.Length; i++)
-        {
-            worldPoints[i] = transform.TransformPoint(localPoints[i]);
-        }
+        rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.None;
+
+        startPosition = transform.position;
+        TargetPosition = transform.position;
+        movementDirection.Normalize();
     }
 
-    private void Update()
+    // Изменили на LateFixedUpdate (образно), считаем позицию прямо перед движением физики
+    void FixedUpdate()
     {
-        if (worldPoints.Length < 2)
-            return;
+        float factor = Mathf.PingPong(Time.fixedTime * speed, distance);
+        Vector3 nextPosition = startPosition + movementDirection * factor;
 
-        if (waitTimer > 0f)
-        {
-            waitTimer -= Time.deltaTime;
-            return;
-        }
+        // Вычисляем дельту движения ДО того, как физически переместить объект
+        DeltaMovement = nextPosition - transform.position;
 
-        Vector3 target = worldPoints[currentIndex];
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            target,
-            speed * Time.deltaTime
-        );
+        // Запоминаем, куда идет платформа
+        TargetPosition = nextPosition;
 
-        if (Vector3.Distance(transform.position, target) < 0.05f)
-        {
-            waitTimer = waitTimeAtPoint;
-            NextPoint();
-        }
-        DeltaMovement = transform.position - lastPosition;
-        lastPosition = transform.position;
+        // Двигаем платформу
+        rb.MovePosition(TargetPosition);
     }
-
-    private void NextPoint()
-    {
-        currentIndex += direction;
-
-        if (pingPong)
-        {
-            if (currentIndex >= worldPoints.Length || currentIndex < 0)
-            {
-                direction *= -1;
-                currentIndex += direction * 2;
-            }
-        }
-        else if (loop)
-        {
-            if (currentIndex >= worldPoints.Length)
-                currentIndex = 0;
-        }
-    }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-        if (localPoints == null || localPoints.Length == 0)
-            return;
-
-        Gizmos.color = Color.yellow;
-
-        for (int i = 0; i < localPoints.Length; i++)
-        {
-            Vector3 world = transform.TransformPoint(localPoints[i]);
-            Gizmos.DrawSphere(world, 0.2f);
-
-            if (i < localPoints.Length - 1)
-            {
-                Vector3 next = transform.TransformPoint(localPoints[i + 1]);
-                Gizmos.DrawLine(world, next);
-            }
-        }
-    }
-#endif
 }
