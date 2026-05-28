@@ -9,29 +9,31 @@ public class PlayerHealth : MonoBehaviour
 
     public event System.Action<int, int> OnHealthChanged;
 
-    // Мигание при неуязвимости
-    private Renderer playerRenderer;
+    // Настройки мигания при неуязвимости
     private Coroutine blinkCoroutine;
+
+    [Header("Invisibility Blink Settings")]
+    [SerializeField] private Color flashColor = Color.red; // Цвет мигания
+    [SerializeField] private float blinkInterval = 0.15f; // Скорость мигания
 
     public event System.Action OnRespawn;
 
     public float invulnerabilityDuration = 2f;
     private bool isInvulnerable = false;
 
-
     public bool IsDead { get; private set; } = false;
     public event System.Action OnDeath;
 
     private Collider playerCollider;
     private CharacterController characterController;
-    private Animator animator; // Ссылка на Аниматор
+    private Animator animator;
 
-    // Ссылки на компоненты эффектов растворения и появления
+    // Ссылки на эффекты
     private CharacterDeathEffect deathEffect;
-    private CharacterAppearEffect appearEffect; // НОВОЕ
+    private CharacterAppearEffect appearEffect;
 
     [Header("Effects Settings")]
-    [SerializeField] private ParticleSystem respawnParticles; // Ссылка на партиклы для возрождения
+    [SerializeField] private ParticleSystem respawnParticles;
 
     private void Start()
     {
@@ -39,13 +41,10 @@ public class PlayerHealth : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         playerCollider = GetComponent<Collider>();
         characterController = GetComponent<CharacterController>();
-        animator = GetComponentInChildren<Animator>(); // Ищем аниматор
+        animator = GetComponentInChildren<Animator>();
 
-        playerRenderer = GetComponentInChildren<Renderer>();
-
-        // Инициализируем ссылки на эффекты
         deathEffect = GetComponent<CharacterDeathEffect>();
-        appearEffect = GetComponent<CharacterAppearEffect>(); // НОВОЕ
+        appearEffect = GetComponent<CharacterAppearEffect>();
     }
 
     public void TakeDamage(int amount)
@@ -59,7 +58,6 @@ public class PlayerHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            // Обычная смерть (Тип 1 — колени, задержка перед спавном 1.5 сек)
             Die(1, 1.5f);
             return;
         }
@@ -67,7 +65,6 @@ public class PlayerHealth : MonoBehaviour
         StartCoroutine(Invulnerability());
     }
 
-    // Новый метод для внешнего триггера Бездны
     public void TakeVoidDamage()
     {
         if (IsDead) return;
@@ -75,7 +72,6 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = 0;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        // Смерть в бездне (Тип 2 — без коленей, респавн мгновенный)
         Die(2, 0f);
     }
 
@@ -86,15 +82,20 @@ public class PlayerHealth : MonoBehaviour
         Debug.Log("Player died, type: " + deathType);
         IsDead = true;
 
-        // Передаем тип смерти в Аниматор
         if (animator != null)
         {
             animator.SetInteger("DeathType", deathType);
         }
 
-        // Запуск бумажного растворения при смерти
+        // Останавливаем мигание перед смертью, чтобы материал не остался красным во время растворения
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+            blinkCoroutine = null;
+        }
         if (deathEffect != null)
         {
+            deathEffect.ResetToOriginalColor();
             deathEffect.PlayDeathEffect();
         }
 
@@ -113,13 +114,11 @@ public class PlayerHealth : MonoBehaviour
     {
         Debug.Log("RespawnPlayer called");
 
-        // Сброс эффекта растворения смерти
         if (deathEffect != null)
         {
-            deathEffect.ResetEffect();
+            deathEffect.ResetEffect(); // Сбросит на оригинальный материал и вернет исходный цвет
         }
 
-        // ЗАПУСК ЭФФЕКТА БУМАЖНОГО ПОЯВЛЕНИЯ ПРИ РЕСПАВНЕ
         if (appearEffect != null)
         {
             appearEffect.PlayAppearEffect();
@@ -143,13 +142,11 @@ public class PlayerHealth : MonoBehaviour
             OnRespawn?.Invoke();
         }
 
-        // Включаем систему частиц в момент появления на точке спавна
         if (respawnParticles != null)
         {
             respawnParticles.Play();
         }
 
-        // Логика возрождения для Аниматора
         if (animator != null)
         {
             animator.SetInteger("DeathType", 0);
@@ -167,7 +164,6 @@ public class PlayerHealth : MonoBehaviour
         StartCoroutine(Invulnerability());
     }
 
-    // IEnumerator виден для Unity
     private IEnumerator Invulnerability()
     {
         isInvulnerable = true;
@@ -176,32 +172,46 @@ public class PlayerHealth : MonoBehaviour
             StopCoroutine(blinkCoroutine);
 
         blinkCoroutine = StartCoroutine(BlinkRoutine());
-        yield return null;
+
         yield return new WaitForSeconds(invulnerabilityDuration);
+
         isInvulnerable = false;
 
         if (blinkCoroutine != null)
         {
             StopCoroutine(blinkCoroutine);
             blinkCoroutine = null;
+        }
 
-            if (playerRenderer != null)
-                playerRenderer.enabled = true;
+        if (deathEffect != null)
+        {
+            deathEffect.ResetToOriginalColor();
         }
     }
 
     private IEnumerator BlinkRoutine()
     {
+        bool isRed = false;
+
         while (isInvulnerable)
         {
-            if (playerRenderer != null)
-                playerRenderer.enabled = !playerRenderer.enabled;
+            if (deathEffect != null)
+            {
+                if (isRed)
+                    deathEffect.ResetToOriginalColor();
+                else
+                    deathEffect.SetFlashColor(flashColor);
 
-            yield return new WaitForSeconds(0.15f);
+                isRed = !isRed;
+            }
+
+            yield return new WaitForSeconds(blinkInterval);
         }
 
-        if (playerRenderer != null)
-            playerRenderer.enabled = true;
+        if (deathEffect != null)
+        {
+            deathEffect.ResetToOriginalColor();
+        }
     }
 
     public void RestoreFullHealth()

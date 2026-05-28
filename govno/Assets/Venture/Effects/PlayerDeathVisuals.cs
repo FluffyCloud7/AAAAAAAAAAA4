@@ -17,9 +17,27 @@ public class CharacterDeathEffect : MonoBehaviour
     private int dissolvePropID;
     private bool isEffectPlaying = false;
 
+    // Переменные для хранения базового цвета оригинального материала
+    private Color cachedOriginalColor;
+    private bool colorCached = false;
+
     void Awake()
     {
         dissolvePropID = Shader.PropertyToID("_DissolveAmount");
+    }
+
+    private void CacheOriginalColor()
+    {
+        if (colorCached || originalMaterial == null) return;
+
+        if (originalMaterial.HasProperty("_BaseColor"))
+            cachedOriginalColor = originalMaterial.GetColor("_BaseColor");
+        else if (originalMaterial.HasProperty("_Color"))
+            cachedOriginalColor = originalMaterial.GetColor("_Color");
+        else
+            cachedOriginalColor = Color.white;
+
+        colorCached = true;
     }
 
     public void PlayDeathEffect()
@@ -38,28 +56,21 @@ public class CharacterDeathEffect : MonoBehaviour
         // Гарантированно возвращаем родной текстурный материал
         if (characterRenderer != null && originalMaterial != null)
         {
+            // Используем .material, чтобы не ломать инстансы при изменении цвета
             characterRenderer.material = originalMaterial;
+            ResetToOriginalColor();
         }
-
-        //if (paperParticles != null)
-        //{
-            //paperParticles.Stop();
-            //paperParticles.Clear();
-        //}
     }
 
     IEnumerator DissolveRoutine()
     {
         isEffectPlaying = true;
 
-        // В момент смерти временно подменяем материал на растворяющийся Opaque
         if (characterRenderer != null && dissolveMaterial != null)
         {
             characterRenderer.material = dissolveMaterial;
-            // Получаем доступ к ТОЛЬКО ЧТО ПОДМЕНЕННОМУ МАТЕРИАЛУ через Renderer.material
             Material liveMaterial = characterRenderer.material;
 
-            // Сбрасываем растворение в 0 (персонаж полностью виден)
             if (liveMaterial != null)
                 liveMaterial.SetFloat(dissolvePropID, 0f);
 
@@ -69,17 +80,13 @@ public class CharacterDeathEffect : MonoBehaviour
             }
 
             float elapsedTime = 0f;
-
-            // duration должна быть равна или чуть МЕНЬШЕ, чем respawnDelay в PlayerHealth.
-            // Я поставлю 1.4f, чтобы был запас в 0.1 сек перед телепортацией.
             float effectDuration = 1.4f;
 
             while (elapsedTime < effectDuration)
             {
                 elapsedTime += Time.deltaTime;
-                float progress = elapsedTime / effectDuration; // Строго от 0 до 1
+                float progress = elapsedTime / effectDuration;
 
-                // Передаем чистый прогресс от 0 до 1 в ПОДМЕНЕННЫЙ материал
                 if (liveMaterial != null)
                 {
                     liveMaterial.SetFloat(dissolvePropID, progress);
@@ -88,7 +95,6 @@ public class CharacterDeathEffect : MonoBehaviour
                 yield return null;
             }
 
-            // ГАРАНТИЯ ИСЧЕЗНОВЕНИЯ: В самом конце зануляем ползунок в максимум (перс точно исчез)
             if (liveMaterial != null)
             {
                 liveMaterial.SetFloat(dissolvePropID, 1f);
@@ -96,5 +102,33 @@ public class CharacterDeathEffect : MonoBehaviour
         }
 
         isEffectPlaying = false;
+    }
+
+    // --- НОВЫЕ МЕТОДЫ ДЛЯ МИГАНИЯ ---
+
+    public void SetFlashColor(Color flashColor)
+    {
+        if (characterRenderer == null) return;
+
+        CacheOriginalColor();
+        Material currentMat = characterRenderer.material;
+
+        if (currentMat.HasProperty("_BaseColor"))
+            currentMat.SetColor("_BaseColor", flashColor);
+        else if (currentMat.HasProperty("_Color"))
+            currentMat.SetColor("_Color", flashColor);
+    }
+
+    public void ResetToOriginalColor()
+    {
+        if (characterRenderer == null) return;
+
+        CacheOriginalColor();
+        Material currentMat = characterRenderer.material;
+
+        if (currentMat.HasProperty("_BaseColor"))
+            currentMat.SetColor("_BaseColor", cachedOriginalColor);
+        else if (currentMat.HasProperty("_Color"))
+            currentMat.SetColor("_Color", cachedOriginalColor);
     }
 }
