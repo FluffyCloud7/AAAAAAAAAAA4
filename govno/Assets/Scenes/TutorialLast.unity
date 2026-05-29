@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 1
+  m_Fog: 0
   m_FogColor: {r: 0.9198113, g: 1, b: 0.9852625, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.005
@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: b729afead3569cb4bbc970f6ba1b3976, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -93,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: d674ea279b6326b499ec8e256632a024, type: 2}
+  m_LightingDataAsset: {fileID: 112000000, guid: de6e5265785ea784584794768d84b5f5, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -19746,7 +19746,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &913606882
 RectTransform:
   m_ObjectHideFlags: 0
@@ -54036,8 +54036,10 @@ MonoBehaviour:
     - {fileID: 8300000, guid: a37b7c685781d774e8d901e02b3778d6, type: 3}
     - {fileID: 8300000, guid: 3083c966eac8ed9448be2e31b7bf6ff0, type: 3}
     - {fileID: 8300000, guid: 5569de8cc036c27428e65274d9dc6c57, type: 3}
-  - name: 
-    audioClips: []
+  - name: PencilScribe
+    audioClips:
+    - {fileID: 8300000, guid: ee90573e6a2a1704297a8ee440ecc607, type: 3}
+    - {fileID: 8300000, guid: c491fb5a404cbb241a5f6086c1f92b5e, type: 3}
 --- !u!82 &1757048625
 AudioSource:
   m_ObjectHideFlags: 0

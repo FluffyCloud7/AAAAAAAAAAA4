@@ -15,8 +15,9 @@ MonoBehaviour:
   npcName: "\u0410\u0432\u0438\u0441"
   npcPortrait: {fileID: 21300000, guid: 57e5c32badb115646833964ef1f2b5bc, type: 3}
   typingSpeed: 0.01
-  voiceSound: {fileID: 8300000, guid: 8b4950fd518bffb48a5b03de03336feb, type: 3}
+  voiceSoundGroupName: PencilScribe
   voicePitch: 1
+  loopVoiceSound: 1
   dialogueLines:
   - text: "\u0427\u0443\u0434\u0435\u0441\u043D\u043E! \u0422\u0435\u043F\u0435\u0440\u044C
       \u043C\u043E\u0436\u043D\u043E \u0438 \u043F\u043E\u0437\u043D\u0430\u043A\u043E\u043C\u0438\u0442\u044C\u0441\u044F.

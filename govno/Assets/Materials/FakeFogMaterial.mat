@@ -12,13 +12,13 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _EMISSION
+  - _COLORADDSUBDIFF_ON
   - _FADING_ON
   - _SOFTPARTICLES_ON
   - _SURFACE_TYPE_TRANSPARENT
   m_InvalidKeywords:
   - _FLIPBOOKBLENDING_OFF
-  m_LightmapFlags: 2
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
@@ -101,7 +101,7 @@ Material:
     - _CameraNearFadeDistance: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ColorMode: 0
+    - _ColorMode: 1
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
@@ -128,7 +128,7 @@ Material:
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 1
-    - _SoftParticlesFarFadeDistance: 10
+    - _SoftParticlesFarFadeDistance: 14
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5
@@ -139,11 +139,11 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0.9490196, g: 0.99215686, b: 0.99002445, a: 1}
-    - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
+    - _BaseColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
     - _Color: {r: 0.9490196, g: 0.9921568, b: 0.9900244, a: 1}
-    - _EmissionColor: {r: 0.7762609, g: 1.0216988, b: 1.1839374, a: 1}
-    - _SoftParticleFadeParams: {r: 0, g: 0.1, b: 0, a: 0}
+    - _EmissionColor: {r: 0.6287825, g: 0.71391577, b: 0.8490566, a: 1}
+    - _SoftParticleFadeParams: {r: 0, g: 0.071428575, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

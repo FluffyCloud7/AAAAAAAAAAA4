@@ -48,7 +48,7 @@ public class NPC : MonoBehaviour, IInteractable
 
         nameText.SetText(dialogueData.npcName);
 
-        // Устанавливаем аватарку для ПЕРВОЙ строчки
+        // Меняем аватарку на стартовую
         UpdatePortrait();
 
         dialoguePanel.SetActive(true);
@@ -61,15 +61,14 @@ public class NPC : MonoBehaviour, IInteractable
         if (isTyping)
         {
             StopAllCoroutines();
-            // ИЗМЕНЕНО: берем .text из структуры
+            SoundEffectManager.StopVoice(); // Останавливаем звук карандаша при пропуске
             dialogueText.SetText(dialogueData.dialogueLines[dialogueIndex].text);
             isTyping = false;
         }
         else if (dialogueIndex + 1 < dialogueData.dialogueLines.Length)
         {
             dialogueIndex++;
-            // Обновляем аватарку при переходе на следующую строчку
-            UpdatePortrait();
+            UpdatePortrait(); // Меняем аватарку на следующей строчке
             StartCoroutine(TypeLine());
         }
         else
@@ -83,12 +82,27 @@ public class NPC : MonoBehaviour, IInteractable
         isTyping = true;
         dialogueText.SetText("");
 
-        // ИЗМЕНЕНО: перебираем символы из dialogueData.dialogueLines[dialogueIndex].text
+        // Включаем зацикленный рандомный микс звуков перед началом печати
+        if (!string.IsNullOrEmpty(dialogueData.voiceSoundGroupName))
+        {
+            SoundEffectManager.PlayVoice(dialogueData.voiceSoundGroupName, dialogueData.voicePitch, dialogueData.loopVoiceSound);
+        }
+
         foreach (char letter in dialogueData.dialogueLines[dialogueIndex].text)
         {
             dialogueText.text += letter;
+
+            // Если галочка НЕ стоит (это обычный пикающий звук букв): играем на каждый символ кроме пробелов
+            if (!string.IsNullOrEmpty(dialogueData.voiceSoundGroupName) && !dialogueData.loopVoiceSound && letter != ' ')
+            {
+                SoundEffectManager.PlayVoice(dialogueData.voiceSoundGroupName, dialogueData.voicePitch, false);
+            }
+
             yield return new WaitForSecondsRealtime(dialogueData.typingSpeed);
         }
+
+        // Выключаем звук, когда текст полностью напечатался
+        SoundEffectManager.StopVoice();
         isTyping = false;
 
         if (dialogueData.autoProgressLines.Length > dialogueIndex && dialogueData.autoProgressLines[dialogueIndex])
@@ -104,23 +118,27 @@ public class NPC : MonoBehaviour, IInteractable
         CursorManager.Instance.SetMode(InputMode.Gameplay);
 
         StopAllCoroutines();
+        SoundEffectManager.StopVoice(); // Жестко глушим звук при закрытии
         isDialogueActive = false;
         dialogueText.SetText("");
         dialoguePanel.SetActive(false);
     }
 
-    // НОВЫЙ МЕТОД: Меняет аватарку. Если у строчки нет своей аватарки, ставит общую из дефолта
+    // Метод переключения аватарок
     private void UpdatePortrait()
     {
-        Sprite currentPortrait = dialogueData.dialogueLines[dialogueIndex].portrait;
+        if (dialogueData.dialogueLines.Length > dialogueIndex)
+        {
+            Sprite currentPortrait = dialogueData.dialogueLines[dialogueIndex].portrait;
 
-        if (currentPortrait != null)
-        {
-            portraitImage.sprite = currentPortrait;
-        }
-        else
-        {
-            portraitImage.sprite = dialogueData.npcPortrait; // Запасной вариант
+            if (currentPortrait != null)
+            {
+                portraitImage.sprite = currentPortrait;
+            }
+            else
+            {
+                portraitImage.sprite = dialogueData.npcPortrait; // Если пусто, берем дефолт
+            }
         }
     }
 }
