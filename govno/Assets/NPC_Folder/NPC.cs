@@ -22,29 +22,19 @@ public class NPC : MonoBehaviour, IInteractable
     {
         if (dialogueData == null)
         {
-            //И сюда бы паузу въебать во вторую часть или
             return;
         }
 
         if (!isDialogueActive)
         {
             StartDialogue();
-
         }
         else
         {
             NextLine();
         }
-
-        //if (isDialogueActive)
-        //{
-        //    NextLine();
-        //}
-       // else
-        //{
-        //    StartDialogue();
-        //}
     }
+
     void StartDialogue()
     {
         dialoguePanel.SetActive(true);
@@ -53,16 +43,15 @@ public class NPC : MonoBehaviour, IInteractable
         GamePauseManager.Instance.RequestPause();
         CursorManager.Instance.SetMode(InputMode.Dialogue);
 
-
         isDialogueActive = true;
         dialogueIndex = 0;
 
         nameText.SetText(dialogueData.npcName);
-        portraitImage.sprite = dialogueData.npcPortrait;
+
+        // Устанавливаем аватарку для ПЕРВОЙ строчки
+        UpdatePortrait();
 
         dialoguePanel.SetActive(true);
-
-        //Сюда бы паузу въебать...
 
         StartCoroutine(TypeLine());
     }
@@ -72,12 +61,15 @@ public class NPC : MonoBehaviour, IInteractable
         if (isTyping)
         {
             StopAllCoroutines();
-            dialogueText.SetText(dialogueData.dialogueLines[dialogueIndex]);
+            // ИЗМЕНЕНО: берем .text из структуры
+            dialogueText.SetText(dialogueData.dialogueLines[dialogueIndex].text);
             isTyping = false;
         }
-        else if(dialogueIndex + 1 < dialogueData.dialogueLines.Length)
+        else if (dialogueIndex + 1 < dialogueData.dialogueLines.Length)
         {
             dialogueIndex++;
+            // Обновляем аватарку при переходе на следующую строчку
+            UpdatePortrait();
             StartCoroutine(TypeLine());
         }
         else
@@ -85,25 +77,27 @@ public class NPC : MonoBehaviour, IInteractable
             EndDialogue();
         }
     }
+
     IEnumerator TypeLine()
     {
         isTyping = true;
         dialogueText.SetText("");
 
-        foreach(char letter in dialogueData.dialogueLines[dialogueIndex])
+        // ИЗМЕНЕНО: перебираем символы из dialogueData.dialogueLines[dialogueIndex].text
+        foreach (char letter in dialogueData.dialogueLines[dialogueIndex].text)
         {
             dialogueText.text += letter;
-            //SoundEffectManager.PlayVoice(dialogueData.voiceSound, dialogueData.voicePitch);
             yield return new WaitForSecondsRealtime(dialogueData.typingSpeed);
         }
         isTyping = false;
 
-        if(dialogueData.autoProgressLines.Length > dialogueIndex && dialogueData.autoProgressLines[dialogueIndex])
+        if (dialogueData.autoProgressLines.Length > dialogueIndex && dialogueData.autoProgressLines[dialogueIndex])
         {
             yield return new WaitForSecondsRealtime(dialogueData.autoProgressDelay);
             NextLine();
         }
     }
+
     public void EndDialogue()
     {
         GamePauseManager.Instance.ReleasePause();
@@ -113,6 +107,20 @@ public class NPC : MonoBehaviour, IInteractable
         isDialogueActive = false;
         dialogueText.SetText("");
         dialoguePanel.SetActive(false);
-        //И тут паузу, но тока отжать а
+    }
+
+    // НОВЫЙ МЕТОД: Меняет аватарку. Если у строчки нет своей аватарки, ставит общую из дефолта
+    private void UpdatePortrait()
+    {
+        Sprite currentPortrait = dialogueData.dialogueLines[dialogueIndex].portrait;
+
+        if (currentPortrait != null)
+        {
+            portraitImage.sprite = currentPortrait;
+        }
+        else
+        {
+            portraitImage.sprite = dialogueData.npcPortrait; // Запасной вариант
+        }
     }
 }
