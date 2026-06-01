@@ -13,6 +13,9 @@ public class NPC : MonoBehaviour, IInteractable
     private int dialogueIndex;
     private bool isTyping, isDialogueActive;
 
+    // Глобальная ссылка на говорящего в данный момент NPC, чтобы кнопка-крестик знала, кого закрывать
+    public static NPC ActiveNPC { get; private set; }
+
     public bool CanInteract()
     {
         return true;
@@ -35,13 +38,27 @@ public class NPC : MonoBehaviour, IInteractable
         }
     }
 
+    void Update()
+    {
+        // Если диалог активен, перехватываем нажатие кнопки E для прокрутки или скипа текста
+        if (isDialogueActive && Input.GetKeyDown(KeyCode.E))
+        {
+            NextLine();
+        }
+    }
+
     void StartDialogue()
     {
+        // Запоминаем текущего активного NPC
+        ActiveNPC = this;
+
         dialoguePanel.SetActive(true);
         Debug.Log(dialoguePanel.activeSelf);
 
         GamePauseManager.Instance.RequestPause();
-        CursorManager.Instance.SetMode(InputMode.Dialogue);
+
+        // Включаем тот самый режим UI, в котором у тебя гарантированно работает кастомный курсор в паузе
+        CursorManager.Instance.SetMode(InputMode.UI);
 
         isDialogueActive = true;
         dialogueIndex = 0;
@@ -50,8 +67,6 @@ public class NPC : MonoBehaviour, IInteractable
 
         // Меняем аватарку на стартовую
         UpdatePortrait();
-
-        dialoguePanel.SetActive(true);
 
         StartCoroutine(TypeLine());
     }
@@ -114,6 +129,11 @@ public class NPC : MonoBehaviour, IInteractable
 
     public void EndDialogue()
     {
+        if (ActiveNPC == this)
+        {
+            ActiveNPC = null;
+        }
+
         GamePauseManager.Instance.ReleasePause();
         CursorManager.Instance.SetMode(InputMode.Gameplay);
 
@@ -124,7 +144,15 @@ public class NPC : MonoBehaviour, IInteractable
         dialoguePanel.SetActive(false);
     }
 
-    // Метод переключения аватарок
+    // Этот статический метод дергает скрипт-прослойка DialogueCloseButton, висящий на твоем крестике
+    public static void CloseActiveDialogue()
+    {
+        if (ActiveNPC != null)
+        {
+            ActiveNPC.EndDialogue();
+        }
+    }
+
     private void UpdatePortrait()
     {
         if (dialogueData.dialogueLines.Length > dialogueIndex)

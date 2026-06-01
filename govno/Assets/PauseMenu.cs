@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -68,5 +69,18 @@ public class PauseMenu : MonoBehaviour
         CursorManager.Instance.SetMode(InputMode.Gameplay);
 
         isPaused = false;
+    }
+
+    // НАШ НОВЫЙ МЕТОД ДЛЯ ВЫХОДА
+    public void QuitGame()
+    {
+        // Этот код сработает в скомпилированном билде (.exe, .apk и т.д.)
+        Application.Quit();
+
+        // Этот код сработает ТОЛЬКО внутри редактора Unity, чтобы вы видели, что кнопка нажата
+#if UNITY_EDITOR
+        Encoding unityEditor = null; // Просто заглушка для компилятора, если нужно
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 }

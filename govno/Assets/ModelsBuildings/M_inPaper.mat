@@ -42,8 +42,8 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _A_Board: {r: 0.20754719, g: 0.1771983, b: 0.1771983, a: 1}
-    - _B_Board: {r: 0.3773585, g: 0.3448281, b: 0.2011392, a: 1}
+    - _A_Board: {r: 0.23584908, g: 0.19200213, b: 0.13461198, a: 1}
+    - _B_Board: {r: 0.6698113, g: 0.6490289, b: 0.55291027, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &5174135133426538419

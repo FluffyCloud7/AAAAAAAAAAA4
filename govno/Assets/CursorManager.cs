@@ -59,6 +59,16 @@ public class CursorManager : MonoBehaviour
 
     private void Start()
     {
+        // ЧИТ-КОД ПРОТИВ ОШИБОК И ДВОЙНОГО КУРСОРA:
+        // Создаем абсолютно прозрачную текстуру 1х1 в памяти, чтобы подменить стрелку Windows
+        Texture2D invisibleTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        invisibleTexture.SetPixel(0, 0, new Color(0f, 0f, 0f, 0f));
+        invisibleTexture.Apply();
+
+        // Назначаем её системным курсором. Теперь Windows-стрелка невидима, но физически существует для UI!
+        Cursor.SetCursor(invisibleTexture, Vector2.zero, CursorMode.Auto);
+
+        // Запускаем стартовый режим геймплея
         SetMode(InputMode.Gameplay);
     }
 
@@ -95,8 +105,8 @@ public class CursorManager : MonoBehaviour
         switch (mode)
         {
             case InputMode.Gameplay:
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked; // Запираем мышь по центру для управления персонажем
+                Cursor.visible = false; // В геймплее полностью блокируем и прячем
+                Cursor.lockState = CursorLockMode.Locked;
 
                 SetCameraPriority(dynamicPlayerCam, ActivePriority);
                 SetCameraPriority(dynamicMouseCam, InactivePriority);
@@ -111,8 +121,8 @@ public class CursorManager : MonoBehaviour
                 break;
 
             case InputMode.MouseGameplay:
-                Cursor.visible = false; // СКРЫВАЕМ белую стрелку ОС
-                Cursor.lockState = CursorLockMode.None; // Но разрешаем мыши двигаться, чтобы перемещать треугольник
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.None;
 
                 SetCameraPriority(dynamicPlayerCam, InactivePriority);
                 SetCameraPriority(dynamicMouseCam, ActivePriority);
@@ -128,7 +138,9 @@ public class CursorManager : MonoBehaviour
 
             case InputMode.Dialogue:
             case InputMode.UI:
-                Cursor.visible = false; // СКРЫВАЕМ белую стрелку ОС в диалогах и меню!
+                // ИСПРАВЛЕНИЕ: Держим true, чтобы Unity считывал координаты мыши для кнопок интерфейса.
+                // Благодаря прозрачной текстуре из Start(), старый курсор двоиться НЕ будет!
+                Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
 
                 if (playerAnimator != null)
