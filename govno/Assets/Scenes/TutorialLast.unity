@@ -62148,7 +62148,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 700be12808886f14d98d45cac1e496e0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3694c027eec52ef448f72cb565d5e6c5, type: 2}
+      objectReference: {fileID: 2100000, guid: aa74ddc1fe2ae234497bccf640da1bdb, type: 2}
     - target: {fileID: 919132149155446097, guid: 700be12808886f14d98d45cac1e496e0, type: 3}
       propertyPath: m_Name
       value: PodvesnoyFonar1
