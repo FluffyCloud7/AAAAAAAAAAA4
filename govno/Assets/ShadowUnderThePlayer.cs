@@ -2,94 +2,113 @@ using UnityEngine;
 
 public class SimpleShadow : MonoBehaviour
 {
+    public enum ShaderColorProperty
+    {
+        _Color,      // Стандартный Built-in шейдер
+        _BaseColor,  // Стандартный URP (Universal RP) шейдер
+        _MainColor   // Некоторые кастомные/мобильные шейдеры
+    }
+
     [Header("References")]
     public Transform player;
 
     [Header("Color Settings")]
-    [Tooltip("Цвет тени (выберите здесь тёмно-синий)")]
+    [Tooltip("Тип свойства цвета в вашем шейдере. Если цвет не меняется, переключите на _BaseColor (актуально для URP)")]
+    public ShaderColorProperty colorProperty = ShaderColorProperty._Color;
+
+    [Tooltip("Цвет тени. Настраивать цвет и альфу нужно ЗДЕСЬ.")]
     [SerializeField] private Color shadowColor = new Color(0.0f, 0.1f, 0.3f);
 
-    [Header("Distance")]
-    public float maxDistance = 6f;
+    [Header("Distance & Fade")]
+    public float maxSearchDistance = 20f;
+    public float fadeDistance = 4f;
 
     [Header("Scale")]
-    [Tooltip("Размер тени, когда игрок стоит на земле")]
     public float maxScale = 1.5f;
-    [Tooltip("Размер тени на максимальной высоте")]
     public float minScale = 0.25f;
 
     [Header("Opacity")]
     [Range(0f, 1f)] public float maxAlpha = 0.6f;
-    [Range(0f, 1f)] public float minAlpha = 0.2f;
+    [Range(0f, 1f)] public float minAlpha = 0.0f;
 
-    [Header("Position & Alignment")]
-    [Tooltip("Смещение над землей во избежание Z-fighting")]
-    public float groundOffset = 0.02f;
-    [Tooltip("Высота, на которую приподнимается точка пуска луча относительно игрока")]
+    [Header("Position & Tweaks")]
+    public float groundOffset = 0.04f;
     public float raycastOriginOffset = 0.5f;
 
+    [Header("Rotation Setup")]
+    [SerializeField] private Vector3 fixedRotation = new Vector3(90f, 0f, 0f);
+
     private Renderer rend;
-    private Material mat;
-    // Кэшируем ID свойства цвета для оптимизации работы с материалом
-    private static readonly int ColorPropertyId = Shader.PropertyToID("_Color");
+    private MaterialPropertyBlock propBlock;
+    private int activeColorId;
 
     void Start()
     {
         rend = GetComponent<Renderer>();
+        propBlock = new MaterialPropertyBlock();
 
-        // Используем вызов для создания уникального экземпляра материала
-        mat = rend.material;
+        // Кешируем выбранное имя свойства цвета
+        activeColorId = Shader.PropertyToID(colorProperty.ToString());
+    }
+
+    // Автоматически обновляем ID свойства, если вы поменяли его в инспекторе во время игры
+    void OnValidate()
+    {
+        activeColorId = Shader.PropertyToID(colorProperty.ToString());
     }
 
     void LateUpdate()
     {
         if (player == null) return;
 
-        RaycastHit hit;
-        // Пускаем луч чуть выше ног игрока, чтобы он не застревал в мелких порожках
         Vector3 rayOrigin = player.position + Vector3.up * raycastOriginOffset;
+        RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, maxSearchDistance + raycastOriginOffset);
 
-        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, maxDistance + raycastOriginOffset))
+        RaycastHit bestHit = new RaycastHit();
+        bool foundValidGround = false;
+        float highestY = -Mathf.Infinity;
+
+        foreach (var hit in hits)
+        {
+            if (hit.collider.isTrigger) continue;
+            if (hit.transform == player || hit.transform.IsChildOf(player)) continue;
+
+            if (hit.point.y > highestY)
+            {
+                highestY = hit.point.y;
+                bestHit = hit;
+                foundValidGround = true;
+            }
+        }
+
+        if (foundValidGround)
         {
             if (!rend.enabled) rend.enabled = true;
 
-            // ===== POSITION =====
-            // Сдвигаем позицию тени немного вдоль нормали поверхности, а не просто строго вверх
-            Vector3 shadowPos = hit.point + hit.normal * groundOffset;
+            Vector3 shadowPos = new Vector3(player.position.x, bestHit.point.y + groundOffset, player.position.z);
             transform.position = shadowPos;
+            transform.rotation = Quaternion.Euler(fixedRotation);
 
-            // ===== ROTATION (Выравнивание по геометрии) =====
-            // Заставляем верх (transform.up) объекта тени смотреть туда же, куда смотрит нормаль земли
-            transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+            float distance = player.position.y - bestHit.point.y;
+            float t = Mathf.Clamp01(distance / fadeDistance);
 
-            // ===== DISTANCE =====
-            // Расстояние считаем честно от ног игрока до точки столкновения
-            float distance = player.position.y - hit.point.y;
-            float t = Mathf.Clamp01(distance / maxDistance);
-
-            // ===== SCALE =====
+            // МАСШТАБ
             float scale = Mathf.Lerp(maxScale, minScale, t);
             transform.localScale = new Vector3(scale, scale, scale);
 
-            // ===== COLOR & OPACITY =====
+            // ЦВЕТ И АЛЬФА (через MaterialPropertyBlock)
             float alpha = Mathf.Lerp(maxAlpha, minAlpha, t);
-
-            // Формируем финальный цвет, комбинируя выбранный синий и посчитанную альфу
             Color finalColor = shadowColor;
             finalColor.a = alpha;
 
-            // Меняем цвет через SetColor (работает со стандартными шейдерами и URP)
-            mat.SetColor(ColorPropertyId, finalColor);
+            // Читаем текущие свойства, меняем цвет, записываем обратно
+            rend.GetPropertyBlock(propBlock);
+            propBlock.SetColor(activeColorId, finalColor);
+            rend.SetPropertyBlock(propBlock);
         }
         else
         {
             if (rend.enabled) rend.enabled = false;
         }
-    }
-
-    private void OnDestroy()
-    {
-        // На всякий случай чистим за собой материал при уничтожении объекта
-        if (mat != null) Destroy(mat);
     }
 }

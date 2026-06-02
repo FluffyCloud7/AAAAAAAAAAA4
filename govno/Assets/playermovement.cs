@@ -14,6 +14,12 @@ public class TopDownPlayerMovement : MonoBehaviour
     public float deceleration = 70f;
     public float airControl = 0.6f;
 
+    [Header("Настройки звуков шагов")]
+    [SerializeField] private string footstepSoundGroup = "Footsteps";
+    [SerializeField] private float pitchRandomness = 0.15f; // Случайное изменение тональности (15%)
+    [Range(0f, 1f)]
+    [SerializeField] private float footstepVolume = 0.4f;   // Настройка громкости шагов (0.4 = 40%)
+
     Animator animator;
     CharacterController controller;
     Vector2 moveInput;
@@ -46,6 +52,23 @@ public class TopDownPlayerMovement : MonoBehaviour
     public void SetVerticalVelocity(float value)
     {
         verticalVelocity = value;
+    }
+
+    // Этот метод вызывается через наш скрипт-передатчик из кадров анимации ходьбы и бега
+    public void PlayFootstep()
+    {
+        // Звук срабатывает только если персонаж на земле и имеет скорость
+        if (controller.isGrounded && currentHorizontalVelocity.magnitude > 0.1f)
+        {
+            if (!string.IsNullOrEmpty(footstepSoundGroup))
+            {
+                // Считаем рандомный питч вокруг единицы
+                float randomPitch = Random.Range(1f - pitchRandomness, 1f + pitchRandomness);
+
+                // Передаем имя группы, питч и громкость шагов четвертым параметром
+                SoundEffectManager.PlayVoice(footstepSoundGroup, randomPitch, false, footstepVolume);
+            }
+        }
     }
 
     void Update()
@@ -126,7 +149,7 @@ public class TopDownPlayerMovement : MonoBehaviour
 
         // ---------- ГРАВИТАЦИЯ ----------
         if (controller.isGrounded && verticalVelocity < 0)
-            verticalVelocity = -4f; // Чуть сильнее прижимаем к полу
+            verticalVelocity = -4f;
 
         if (verticalVelocity < 0)
             verticalVelocity += gravity * fallMultiplier * Time.fixedDeltaTime;
@@ -156,17 +179,13 @@ public class TopDownPlayerMovement : MonoBehaviour
         Vector3 finalVelocity = currentHorizontalVelocity;
         finalVelocity.y = verticalVelocity;
 
-        // Сначала перемещаем контроллер на его собственную скорость
         controller.Move(finalVelocity * Time.fixedDeltaTime);
 
-        // ЖЕСТКИЙ ХАК ДЛЯ CHARACTER CONTROLLER:
-        // Если мы стоим на платформе, после выполнения собственного движения мы принудительно 
-        // дотягиваем трансформ персонажа за дельтой платформы в обход коллизий контроллера.
         if (currentPlatform != null)
         {
-            controller.enabled = false; // Выключаем на долю миллисекунды, чтобы не было сопротивления физики
+            controller.enabled = false;
             transform.position += platformMovement;
-            controller.enabled = true;  // Включаем обратно
+            controller.enabled = true;
         }
     }
 }

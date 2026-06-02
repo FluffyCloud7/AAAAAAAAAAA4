@@ -7,51 +7,59 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Dust_M
-  m_Shader: {fileID: 4800000, guid: 13c02b14c4d048fa9653293d54f6e0e1, type: 3}
-  m_Parent: {fileID: 2100000, guid: 7867bb4edb6f3264e85885546bfdb6d8, type: 2}
-  m_ModifiedSerializedProperties: 2
+  m_Name: PolosuYzor 1
+  m_Shader: {fileID: -6465566751694194690, guid: 37a15558b6c4afe4d846c34910df01a9, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _ALPHAPREMULTIPLY_ON
-  - _COLORADDSUBDIFF_ON
-  - _SURFACE_TYPE_TRANSPARENT
-  m_LightmapFlags: 0
+  m_InvalidKeywords: []
+  m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap:
-    RenderType: Transparent
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
-  - DepthOnly
-  - SHADOWCASTER
-  - GRABPASS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: a648391b33d795943b37add265751266, type: 3}
+    - _Base_Texture:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: a648391b33d795943b37add265751266, type: 3}
+    - _Paper_Fibers:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Paper_Normal:
+        m_Texture: {fileID: 2800000, guid: 6ac878e469cecbd49adc26c78b9e1c84, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BlendModePreserveSpecular: 0
-    - _DstBlend: 10
-    - _DstBlendAlpha: 10
-    - _SrcBlend: 1
-    - _Surface: 1
-    - _ZWrite: 0
+    - _Normal_Strength: 0.56
+    - _Paper_Scale: 5
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _Smoothness: 0.2
     m_Colors:
-    - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
+    - _Color_Real: {r: 0.56559277, g: 0.6772923, b: 0.7735849, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &6699183557630521528
+--- !u!114 &6426463030372771580
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

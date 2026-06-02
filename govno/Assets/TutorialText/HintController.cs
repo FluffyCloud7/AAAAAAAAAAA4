@@ -18,6 +18,7 @@ public class HintController : MonoBehaviour
     public float writingSpeed = 0.04f;
 
     private bool isShowing = false;
+    private string originalText; // Запоминаем исходный текст
 
     void Start()
     {
@@ -30,12 +31,12 @@ public class HintController : MonoBehaviour
             return;
         }
 
-        // Изначально полностью прячем текст, обнуляя видимые символы
-        textComponent.maxVisibleCharacters = 0;
+        // Сохраняем текст, который ты написала в инспекторе
+        originalText = textComponent.text;
 
-        // ИСПРАВЛЕНИЕ: Вместо выключения всего объекта (SetActive(false)), 
-        // мы просто включаем сам рендерер текста, чтобы корутина могла стартовать!
-        textComponent.enabled = false;
+        // Важно: Текст оставляем включенным (enabled = true), но прячем буквы.
+        // Если выключить компонент, TMPro не сможет корректно просчитать объемы строк.
+        textComponent.maxVisibleCharacters = 0;
 
         if (activateByTime)
         {
@@ -43,12 +44,10 @@ public class HintController : MonoBehaviour
         }
     }
 
-    // Этот метод будет вызывать наш триггер из зоны на полу
     public void TriggerActivation()
     {
-        if (isShowing) return; // Защита, чтобы анимация не перезапускалась дважды
+        if (isShowing) return;
 
-        // Останавливаем старые корутины на всякий случай и запускаем написание текста
         StopAllCoroutines();
         StartCoroutine(WriteTextRoutine());
     }
@@ -63,13 +62,19 @@ public class HintController : MonoBehaviour
     {
         isShowing = true;
 
-        // ИСПРАВЛЕНИЕ: Включаем компонент текста обратно
-        textComponent.enabled = true;
-        textComponent.maxVisibleCharacters = 0;
+        // Шаг 1: Возвращаем полный текст и временно делаем все буквы видимыми
+        textComponent.text = originalText;
+        textComponent.maxVisibleCharacters = 9999;
 
+        // Шаг 2: Жестко приказываем Unity просчитать финальные границы и переносы строк
         textComponent.ForceMeshUpdate();
 
+        // Шаг 3: Теперь, когда строки зафиксированы на стене, узнаем точное число символов...
         int totalVisibleCharacters = textComponent.textInfo.characterCount;
+
+        // ...и только сейчас мгновенно прячем их перед началом анимации
+        textComponent.maxVisibleCharacters = 0;
+
         int counter = 0;
 
         while (counter <= totalVisibleCharacters)
@@ -80,9 +85,9 @@ public class HintController : MonoBehaviour
         }
     }
 
-    // Публичный метод на случай, если тебе нужно будет кодом поменять текст подсказки налету
     public void ChangeHintText(string newText)
     {
+        originalText = newText;
         if (textComponent != null)
         {
             textComponent.text = newText;

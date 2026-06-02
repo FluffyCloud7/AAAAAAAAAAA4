@@ -6,6 +6,10 @@ public class HintTriggerZone : MonoBehaviour
     [Tooltip("Перетащи сюда объект со стены, на котором висит скрипт HintController")]
     public HintController hintController;
 
+    [Header("Настройки звука")]
+    [Tooltip("Имя группы звуков, настроенное в SoundEffectLibrary. Если оставить пустым, звука не будет.")]
+    [SerializeField] private string soundGroupName;
+
     [Header("Настройки фильтра")]
     public string playerTag = "Player";
 
@@ -20,6 +24,13 @@ public class HintTriggerZone : MonoBehaviour
         if (hintController != null)
         {
             isActivated = true; // Блокируем повторные вызовы
+
+            // ВОСПРОИЗВЕДЕНИЕ ЗВУКА: дергаем наш звуковой менеджер по имени группы
+            if (!string.IsNullOrEmpty(soundGroupName))
+            {
+                SoundEffectManager.Play(soundGroupName);
+            }
+
             hintController.TriggerActivation();
         }
         else

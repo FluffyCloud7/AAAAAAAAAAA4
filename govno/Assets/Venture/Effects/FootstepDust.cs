@@ -2,35 +2,67 @@ using UnityEngine;
 
 public class FootstepDust : MonoBehaviour
 {
-    [Header("Настройки пыли")]
-    [SerializeField] private ParticleSystem dustPrefab;
-    [SerializeField] private Transform leftFootTransform;
-    [SerializeField] private Transform rightFootTransform;
+    [Header("Префабы пыли")]
+    [SerializeField] private ParticleSystem walkDustPrefab;
+    [SerializeField] private ParticleSystem runDustPrefab;
 
-    // Этот метод будет вызываться из анимации для левой ноги
-    public void TriggerLeftFootDust()
+    [Header("Точки для ХОДЬБЫ")]
+    [SerializeField] private Transform leftFootWalkPoint;
+    [SerializeField] private Transform rightFootWalkPoint;
+
+    [Header("Точки для БЕГА")]
+    [SerializeField] private Transform leftFootRunPoint;
+    [SerializeField] private Transform rightFootRunPoint;
+
+    // --- МЕТОДЫ ДЛЯ ХОДЬБЫ ---
+    public void TriggerLeftFootWalkDust()
     {
-        SpawnDust(leftFootTransform.position);
+        SpawnDust(leftFootWalkPoint.position, walkDustPrefab);
     }
 
-    // Этот метод для правой ноги
-    public void TriggerRightFootDust()
+    public void TriggerRightFootWalkDust()
     {
-        SpawnDust(rightFootTransform.position);
+        SpawnDust(rightFootWalkPoint.position, walkDustPrefab);
     }
 
-    private void SpawnDust(Vector3 position)
+    // --- МЕТОДЫ ДЛЯ БЕГА ---
+    public void TriggerLeftFootRunDust()
     {
-        if (dustPrefab != null)
+        SpawnDust(leftFootRunPoint.position, runDustPrefab);
+    }
+
+    public void TriggerRightFootRunDust()
+    {
+        SpawnDust(rightFootRunPoint.position, runDustPrefab);
+    }
+
+    // Универсальный спавн
+    private void SpawnDust(Vector3 position, ParticleSystem prefab)
+    {
+        if (prefab != null)
         {
-            // Создаем партикл в точке ноги
-            ParticleSystem dustInstance = Instantiate(dustPrefab, position, Quaternion.identity);
-
-            // Запускаем воспроизведение
+            ParticleSystem dustInstance = Instantiate(prefab, position, transform.rotation);
             dustInstance.Play();
-
-            // Уничтожаем объект после того, как он отыграет, чтобы не засорять память
             Destroy(dustInstance.gameObject, dustInstance.main.duration + dustInstance.main.startLifetime.constantMax);
         }
+    }
+
+    [Header("Префаб для ПРИЗЕМЛЕНИЯ")]
+    [SerializeField] private ParticleSystem landDustPrefab;
+
+    // Этот метод мы будем вызывать при приземлении
+    public void TriggerLandingDust()
+    {
+        if (landDustPrefab == null) return;
+
+        // Берем позицию центра персонажа на земле
+        Vector3 spawnPosition = transform.position;
+
+        // Спавним пыль. Так как форма круга уже развернута в префабе (X = 90),
+        // мы можем использовать Quaternion.identity, чтобы она легла ровно на землю.
+        ParticleSystem dustInstance = Instantiate(landDustPrefab, spawnPosition, Quaternion.identity);
+        dustInstance.Play();
+
+        Destroy(dustInstance.gameObject, dustInstance.main.duration + dustInstance.main.startLifetime.constantMax);
     }
 }
