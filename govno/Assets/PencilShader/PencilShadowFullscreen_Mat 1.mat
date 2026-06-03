@@ -33,11 +33,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _HatchContrast: 2.28
+    - _HatchContrast: 0.99
     - _HatchJitterSpeed: 2
     - _HatchJitterStrength: 0.01
     - _HatchOpacity: 1
-    - _HatchScale: 4.62
+    - _HatchScale: 2.95
     - _HatchSpeed: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
