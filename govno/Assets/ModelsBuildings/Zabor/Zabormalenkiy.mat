@@ -58,8 +58,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Normal_Strength: 0.64
-    - _Paper_Scale: 4.69
+    - _Normal_Strength: 0.95
+    - _Paper_Scale: 1.7
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Smoothness: 0

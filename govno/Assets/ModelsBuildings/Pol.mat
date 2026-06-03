@@ -58,14 +58,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Normal_Strength: 0.75
-    - _Paper_Scale: 0.4
+    - _Normal_Strength: 0.9999999
+    - _Paper_Scale: 0.14
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Smoothness: 0
     m_Colors:
     - _Color_Real: {r: 0.9056604, g: 0.89951944, b: 0.80740476, a: 1}
-    - _DarkThingies: {r: 1, g: 0.959332, b: 0.8632076, a: 1}
+    - _DarkThingies: {r: 0.6320754, g: 0.5153715, b: 0.2236116, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &6426463030372771580

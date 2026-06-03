@@ -7,26 +7,27 @@ public class NPC : MonoBehaviour, IInteractable
 {
     public NPCDialogue dialogueData;
     public GameObject dialoguePanel;
+    public Animator dialogueAnimator;
     public TMP_Text dialogueText, nameText;
     public Image portraitImage;
 
     private int dialogueIndex;
     private bool isTyping, isDialogueActive;
 
-    // Глобальная ссылка на говорящего в данный момент NPC, чтобы кнопка-крестик знала, кого закрывать
+    // Флаг, который защищает от спама кнопкой закрытия, пока панель улетает
+    private bool isClosing;
+
     public static NPC ActiveNPC { get; private set; }
 
     public bool CanInteract()
     {
-        return true;
+        // Не разрешаем взаимодействовать, если диалог прямо сейчас закрывается
+        return !isClosing;
     }
 
     public void Interact()
     {
-        if (dialogueData == null)
-        {
-            return;
-        }
+        if (dialogueData == null || isClosing) return;
 
         if (!isDialogueActive)
         {
@@ -40,8 +41,7 @@ public class NPC : MonoBehaviour, IInteractable
 
     void Update()
     {
-        // Если диалог активен, перехватываем нажатие кнопки E для прокрутки или скипа текста
-        if (isDialogueActive && Input.GetKeyDown(KeyCode.E))
+        if (isDialogueActive && Input.GetKeyDown(KeyCode.E) && !isClosing)
         {
             NextLine();
         }
@@ -49,41 +49,50 @@ public class NPC : MonoBehaviour, IInteractable
 
     void StartDialogue()
     {
-        // Запоминаем текущего активного NPC
         ActiveNPC = this;
+        isClosing = false;
 
         dialoguePanel.SetActive(true);
-        Debug.Log(dialoguePanel.activeSelf);
+
+        if (dialogueAnimator != null)
+        {
+            dialogueAnimator.SetTrigger("Show");
+        }
 
         GamePauseManager.Instance.RequestPause();
-
-        // Включаем тот самый режим UI, в котором у тебя гарантированно работает кастомный курсор в паузе
         CursorManager.Instance.SetMode(InputMode.UI);
 
         isDialogueActive = true;
         dialogueIndex = 0;
 
         nameText.SetText(dialogueData.npcName);
-
-        // Меняем аватарку на стартовую
         UpdatePortrait();
 
+        StartCoroutine(StartTypeLineWithDelay());
+    }
+
+    IEnumerator StartTypeLineWithDelay()
+    {
+        // Небольшое ожидание появления панели (подгони под длину Dialogue_In, например 0.15–0.2 сек)
+        yield return new WaitForSecondsRealtime(0.2f);
         StartCoroutine(TypeLine());
     }
 
     void NextLine()
     {
+        if (isClosing) return;
+
         if (isTyping)
         {
             StopAllCoroutines();
-            SoundEffectManager.StopVoice(); // Останавливаем звук карандаша при пропуске
+            SoundEffectManager.StopVoice();
             dialogueText.SetText(dialogueData.dialogueLines[dialogueIndex].text);
             isTyping = false;
         }
         else if (dialogueIndex + 1 < dialogueData.dialogueLines.Length)
         {
             dialogueIndex++;
-            UpdatePortrait(); // Меняем аватарку на следующей строчке
+            UpdatePortrait();
             StartCoroutine(TypeLine());
         }
         else
@@ -97,7 +106,6 @@ public class NPC : MonoBehaviour, IInteractable
         isTyping = true;
         dialogueText.SetText("");
 
-        // Включаем зацикленный рандомный микс звуков перед началом печати
         if (!string.IsNullOrEmpty(dialogueData.voiceSoundGroupName))
         {
             SoundEffectManager.PlayVoice(dialogueData.voiceSoundGroupName, dialogueData.voicePitch, dialogueData.loopVoiceSound);
@@ -107,7 +115,6 @@ public class NPC : MonoBehaviour, IInteractable
         {
             dialogueText.text += letter;
 
-            // Если галочка НЕ стоит (это обычный пикающий звук букв): играем на каждый символ кроме пробелов
             if (!string.IsNullOrEmpty(dialogueData.voiceSoundGroupName) && !dialogueData.loopVoiceSound && letter != ' ')
             {
                 SoundEffectManager.PlayVoice(dialogueData.voiceSoundGroupName, dialogueData.voicePitch, false);
@@ -116,7 +123,6 @@ public class NPC : MonoBehaviour, IInteractable
             yield return new WaitForSecondsRealtime(dialogueData.typingSpeed);
         }
 
-        // Выключаем звук, когда текст полностью напечатался
         SoundEffectManager.StopVoice();
         isTyping = false;
 
@@ -129,22 +135,49 @@ public class NPC : MonoBehaviour, IInteractable
 
     public void EndDialogue()
     {
+        if (isClosing) return; // Если уже закрываемся, ничего не делаем
+        isClosing = true;
+
         if (ActiveNPC == this)
         {
             ActiveNPC = null;
         }
 
+        // Немедленно возвращаем управление игроку и убираем паузу
         GamePauseManager.Instance.ReleasePause();
         CursorManager.Instance.SetMode(InputMode.Gameplay);
 
+        // Останавливаем корутины печати текста и глушим звук
         StopAllCoroutines();
-        SoundEffectManager.StopVoice(); // Жестко глушим звук при закрытии
+        SoundEffectManager.StopVoice();
         isDialogueActive = false;
-        dialogueText.SetText("");
-        dialoguePanel.SetActive(false);
+
+        if (dialogueAnimator != null)
+        {
+            // Запускаем анимацию закрытия
+            dialogueAnimator.SetTrigger("Hide");
+            // Запускаем корутину, которая выключит панель после окончания анимации
+            StartCoroutine(DisablePanelAfterAnimation());
+        }
+        else
+        {
+            // Если аниматора нет, выключаем мгновенно, как раньше
+            dialogueText.SetText("");
+            dialoguePanel.SetActive(false);
+            isClosing = false;
+        }
     }
 
-    // Этот статический метод дергает скрипт-прослойка DialogueCloseButton, висящий на твоем крестике
+    IEnumerator DisablePanelAfterAnimation()
+    {
+        // Даем анимации закрытия проиграться (подгони под длину клипа Dialogue_Out, например 0.2 сек)
+        yield return new WaitForSecondsRealtime(0.2f);
+
+        dialogueText.SetText("");
+        dialoguePanel.SetActive(false);
+        isClosing = false; // Сбрасываем флаг, теперь NPC снова готов к диалогам
+    }
+
     public static void CloseActiveDialogue()
     {
         if (ActiveNPC != null)
@@ -165,7 +198,7 @@ public class NPC : MonoBehaviour, IInteractable
             }
             else
             {
-                portraitImage.sprite = dialogueData.npcPortrait; // Если пусто, берем дефолт
+                portraitImage.sprite = dialogueData.npcPortrait;
             }
         }
     }
