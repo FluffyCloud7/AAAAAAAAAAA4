@@ -33,14 +33,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _HatchContrast: 2.47
+    - _HatchContrast: 2.28
     - _HatchJitterSpeed: 2
     - _HatchJitterStrength: 0.01
     - _HatchOpacity: 1
-    - _HatchScale: 5.66
+    - _HatchScale: 4.62
     - _HatchSpeed: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _HatchColor: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 1}
+    - _HatchColor: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

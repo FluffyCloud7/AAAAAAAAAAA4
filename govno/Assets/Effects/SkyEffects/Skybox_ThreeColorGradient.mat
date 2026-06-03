@@ -40,7 +40,7 @@ Material:
     - _SkyBlur: 1
     - _UpExponent: 1.08
     m_Colors:
-    - _CloudColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CloudColor: {r: 0.9029459, g: 0.9399792, b: 0.9716981, a: 1}
     - _GroundColor: {r: 0.36320752, g: 0.5183923, b: 1, a: 1}
     - _HorizonColor: {r: 0.6556604, g: 0.8278302, b: 1, a: 1}
     - _SkyColor: {r: 0.26330546, g: 0.32916388, b: 0.5754717, a: 1}

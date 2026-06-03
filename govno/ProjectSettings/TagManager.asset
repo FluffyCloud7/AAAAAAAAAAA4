@@ -18,7 +18,7 @@ TagManager:
   - Draggable
   - Paper
   - InkPuddle
-  - 
+  - Player
   - 
   - 
   - 
@@ -52,3 +52,4 @@ TagManager:
   - Light Layer 5
   - Light Layer 6
   - Light Layer 7
+  - RecieveDecals
