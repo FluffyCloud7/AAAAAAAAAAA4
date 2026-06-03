@@ -8,9 +8,6 @@ public class DamageZone : MonoBehaviour
 
     Coroutine damageCoroutine;
     PlayerHealth currentPlayer;
-
-    // МЫ НЕ УДАЛЯЕМ эту переменную, чтобы не сломать зависимости, если они где-то есть,
-    // но теперь нам важнее найти InkSystem на этом же объекте.
     InkPuddleMask puddle;
 
     void Start()
@@ -66,19 +63,15 @@ public class DamageZone : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, 2f, ~0, QueryTriggerInteraction.Ignore))
             {
-                // ИСПРАВЛЕНИЕ: Вместо InkPuddleMask ищем InkSystem, которую стирает губка
                 InkSystem inkSys = hit.collider.GetComponent<InkSystem>();
 
                 if (inkSys != null)
                 {
-                    // Проверяем реальную маску, изменённую губкой
                     if (inkSys.HasInk(hit.textureCoord))
                         return true;
                 }
                 else
                 {
-                    // На всякий случай (резервный вариант): если InkSystem вдруг нет, 
-                    // проверяем старый InkPuddleMask, чтобы ничего не отвалилось
                     InkPuddleMask mask = hit.collider.GetComponent<InkPuddleMask>();
                     if (mask != null && mask.HasInk(hit.textureCoord))
                         return true;

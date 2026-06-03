@@ -23,7 +23,6 @@ public class InkSystem : MonoBehaviour
     private Material eraseMat;
     private RenderTextureFormat maskFormat = RenderTextureFormat.R8;
 
-    // Таймер для отсчета задержки
     private float delayTimer = 0f;
 
     void Start()
@@ -57,21 +56,18 @@ public class InkSystem : MonoBehaviour
     {
         if (!autoRegenerate || inkMask == null || regenMat == null) return;
 
-        // Если таймер еще тикает, уменьшаем его и НЕ восстанавливаем чернила
         if (delayTimer > 0f)
         {
             delayTimer -= Time.deltaTime;
         }
         else
         {
-            // Таймер закончился — чернила начинают БЫСТРО стягиваться обратно
             RegenerateInk();
         }
     }
 
     private void RegenerateInk()
     {
-        // Передаем нашу новую высокую скорость в шейдер
         regenMat.SetFloat("_RegenSpeed", fastRegenSpeed * Time.deltaTime);
 
         RenderTexture temp = RenderTexture.GetTemporary(inkMask.width, inkMask.height, 0, maskFormat, RenderTextureReadWrite.Linear);
@@ -80,10 +76,8 @@ public class InkSystem : MonoBehaviour
         RenderTexture.ReleaseTemporary(temp);
     }
 
-    // ТВОЙ МЕТОД СТИРАНИЯ (ДОБАВЛЕН СБРОС ТАЙМЕРА)
     public void Erase(Vector2 uv, float radius)
     {
-        // КАК ТОЛЬКО ГУБКА ТРЕТ ЛУЖУ — МЫ СБРАСЫВАЕМ ТАЙМЕР ЗАДЕРЖКИ ЗАЗАНОВО!
         delayTimer = regenDelay;
 
         if (eraseMat == null) return;

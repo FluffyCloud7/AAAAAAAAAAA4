@@ -11,16 +11,19 @@ public class SpongeCleaner : MonoBehaviour
     public float absorptionRate = 0.5f;
     private float currentInkAmount = 0f;
 
-    [Header("Текстуры губки")]
-    [Tooltip("Чистая желтая текстура")]
+    [Header("Текстуры для Shader Graph")]
+    [Tooltip("Твоя чистая желтая текстура")]
     public Texture2D cleanSpongeTexture;
-    [Tooltip("Грязная фиолетовая текстура из Фотошопа")]
+    [Tooltip("Твоя грязная фиолетовая текстура")]
     public Texture2D dirtySpongeTexture;
 
     [Header("Визуализация")]
     public MeshRenderer spongeRenderer;
-
     private Material spongeMaterial;
+
+    // Переменные для отслеживания движения губки
+    private Vector3 lastPosition;
+    private float movementThreshold = 0.01f;
 
     void Start()
     {
@@ -33,13 +36,11 @@ public class SpongeCleaner : MonoBehaviour
         {
             spongeMaterial = spongeRenderer.material;
 
-            // Передаем текстуры в Shader Graph при старте
+            // Передаем текстуры в Shader Graph по именам из твоего Blackboard
             if (cleanSpongeTexture != null && spongeMaterial.HasProperty("_BaseTexture"))
             {
                 spongeMaterial.SetTexture("_BaseTexture", cleanSpongeTexture);
             }
-
-            // Загружаем фиолетовую грязную текстуру в новое свойство
             if (dirtySpongeTexture != null && spongeMaterial.HasProperty("_DirtyTexture"))
             {
                 spongeMaterial.SetTexture("_DirtyTexture", dirtySpongeTexture);
@@ -47,14 +48,13 @@ public class SpongeCleaner : MonoBehaviour
 
             UpdateSpongeVisual();
         }
-        else
-        {
-            Debug.LogWarning("[SpongeCleaner]: Не найден MeshRenderer на объекте!");
-        }
+
+        lastPosition = transform.position;
     }
 
     void FixedUpdate()
     {
+        // Если губка заполнена — стоп работа
         if (currentInkAmount >= maxInkCapacity)
         {
             Debug.DrawRay(transform.position + Vector3.up * 1.0f, Vector3.down * rayDistance, Color.gray);
@@ -72,20 +72,29 @@ public class SpongeCleaner : MonoBehaviour
 
         RaycastHit hit;
 
+        // ТВОЙ ОРИГИНАЛЬНЫЙ ЛУЧ
         if (Physics.Raycast(rayOrigin, downDirection, out hit, rayDistance, inkLayerMask, QueryTriggerInteraction.Ignore))
         {
+            // Ищем оригинальный GPU скрипт лужи
             InkSystem ink = hit.collider.GetComponent<InkSystem>();
             if (ink != null)
             {
+                // Вызываем стирание напрямую по твоей логике
                 ink.Erase(hit.textureCoord, eraseRadius);
 
-                currentInkAmount += absorptionRate;
-                currentInkAmount = Mathf.Clamp(currentInkAmount, 0f, maxInkCapacity);
-
-                UpdateSpongeVisual();
+                // Проверяем движение губки
+                float distanceMoved = Vector3.Distance(transform.position, lastPosition);
+                if (distanceMoved > movementThreshold)
+                {
+                    // Пачкается только при движении по грязи
+                    currentInkAmount += absorptionRate;
+                    currentInkAmount = Mathf.Clamp(currentInkAmount, 0f, maxInkCapacity);
+                    UpdateSpongeVisual();
+                }
             }
         }
 
+        lastPosition = transform.position;
         Debug.DrawRay(rayOrigin, downDirection * rayDistance, Color.red);
     }
 
@@ -93,10 +102,9 @@ public class SpongeCleaner : MonoBehaviour
     {
         if (spongeMaterial != null)
         {
-            // Рассчитываем прогресс от 0.0 до 1.0
             float progress = currentInkAmount / maxInkCapacity;
 
-            // Двигаем твой ползунок SpongeDirtProgress внутри Shader Graph
+            // Крутим ползунок прогресса в Shader Graph
             if (spongeMaterial.HasProperty("_SpongeDirtProgress"))
             {
                 spongeMaterial.SetFloat("_SpongeDirtProgress", progress);
