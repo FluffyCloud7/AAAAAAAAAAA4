@@ -56,5 +56,6 @@ Material:
     - _QueueOffset: 0
     m_Colors:
     - _BeamColor: {r: 5.771131, g: 4.552848, b: 1.823895, a: 1}
+    - _ObjPos: {r: -49.4, g: -44.3, b: -19.2, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
