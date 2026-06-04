@@ -10,21 +10,13 @@ public class CuttableShape : MonoBehaviour
     public Transform spawnPoint;
 
     [Header("Настройки партиклов")]
-    [Tooltip("Префаб системы частиц (Particle System), который бахнет при появлении вещи")]
     [SerializeField] private GameObject spawnParticlesPrefab;
 
     [Header("Настройки анимации")]
-    [Tooltip("Материал со сплошной красивой текстурой мазка (Texture Mode: Stretch)")]
     [SerializeField] private Material solidLineMaterial;
-
-    [Tooltip("Время анимации разреза в секундах")]
     [SerializeField] private float cutAnimationDuration = 0.8f;
-
-    [Tooltip("Множитель толщины для финальной линии")]
     [Range(0.05f, 2f)]
     [SerializeField] private float solidLineWidthMultiplier = 0.3f;
-
-    [Tooltip("Смещение линии вперед по локальной оси Z, чтобы она не сливалась с формой")]
     [SerializeField] private float zLocalOffset = -0.1f;
 
     private int visitedCount = 0;
@@ -33,17 +25,15 @@ public class CuttableShape : MonoBehaviour
     private int firstVisitedIndex = -1;
     private int direction = 0;
 
-    private LineRenderer dottedLineRenderer; // Пунктир (основной)
-    private LineRenderer solidLineRenderer;  // Сплошной (дочерний)
+    private LineRenderer dottedLineRenderer;
+    private LineRenderer solidLineRenderer;
     private Camera mainCamera;
 
     private void Start()
     {
         mainCamera = Camera.main;
-
         dottedLineRenderer = GetComponent<LineRenderer>();
         dottedLineRenderer.positionCount = 0;
-
         dottedLineRenderer.useWorldSpace = false;
         dottedLineRenderer.alignment = LineAlignment.View;
 
@@ -51,7 +41,6 @@ public class CuttableShape : MonoBehaviour
         childObj.transform.SetParent(transform, false);
 
         solidLineRenderer = childObj.AddComponent<LineRenderer>();
-
         solidLineRenderer.useWorldSpace = false;
         solidLineRenderer.alignment = LineAlignment.View;
 
@@ -210,8 +199,6 @@ public class CuttableShape : MonoBehaviour
         while (elapsedTime < cutAnimationDuration)
         {
             elapsedTime += Time.deltaTime;
-
-            // ЗДЕСЬ ВСЁ ИСПРАВЛЕНО (убрал дубликат слова progress)
             float progress = Mathf.Clamp01(elapsedTime / cutAnimationDuration);
 
             float currentPathTarget = progress * (totalPositions - 1);
@@ -221,10 +208,7 @@ public class CuttableShape : MonoBehaviour
 
             for (int i = 0; i <= pointsToDraw; i++)
             {
-                if (i < totalPositions)
-                {
-                    solidLineRenderer.SetPosition(i, pathPositions[i]);
-                }
+                if (i < totalPositions) solidLineRenderer.SetPosition(i, pathPositions[i]);
             }
 
             if (pointsToDraw < totalPositions)
@@ -257,8 +241,21 @@ public class CuttableShape : MonoBehaviour
         solidLineRenderer.enabled = false;
 
         Vector3 finalSpawnPos = spawnPoint != null ? spawnPoint.position : transform.position + Vector3.right * 2f;
+        GameObject prefabToSpawn = resultPrefab;
 
-        Instantiate(resultPrefab, finalSpawnPos, Quaternion.identity);
+        if (CutValidator.Instance != null)
+        {
+            List<CutPoint> visitedPointsList = new List<CutPoint>();
+            foreach (var point in points)
+            {
+                if (point.Visited) visitedPointsList.Add(point);
+            }
+
+            // Передаем валидатору то, что нарезали, и вообще ВСЕ точки этой формы
+            prefabToSpawn = CutValidator.Instance.ValidateCut(visitedPointsList, points);
+        }
+
+        if (prefabToSpawn != null) Instantiate(prefabToSpawn, finalSpawnPos, Quaternion.identity);
 
         if (spawnParticlesPrefab != null)
         {
