@@ -9,6 +9,10 @@ public class CuttableShape : MonoBehaviour
     public GameObject resultPrefab;
     public Transform spawnPoint;
 
+    [Header("Настройки партиклов")]
+    [Tooltip("Префаб системы частиц (Particle System), который бахнет при появлении вещи")]
+    [SerializeField] private GameObject spawnParticlesPrefab;
+
     [Header("Настройки анимации")]
     [Tooltip("Материал со сплошной красивой текстурой мазка (Texture Mode: Stretch)")]
     [SerializeField] private Material solidLineMaterial;
@@ -40,11 +44,9 @@ public class CuttableShape : MonoBehaviour
         dottedLineRenderer = GetComponent<LineRenderer>();
         dottedLineRenderer.positionCount = 0;
 
-        // РАБОТАЕМ СТРОГО В ЛОКАЛЬНЫХ КООРДИНАТАХ ФОРМЫ (Линия никогда не утонет в полу)
         dottedLineRenderer.useWorldSpace = false;
-        dottedLineRenderer.alignment = LineAlignment.View; // Смотрит широкой стороной на камеру
+        dottedLineRenderer.alignment = LineAlignment.View;
 
-        // Автоматически создаем объект для красивой линии
         GameObject childObj = new GameObject("SolidLine_Animated");
         childObj.transform.SetParent(transform, false);
 
@@ -77,22 +79,12 @@ public class CuttableShape : MonoBehaviour
 
     private void UpdateTrailingLine()
     {
-        // Получаем честную мировую позицию первой зеленой точки
         Vector3 refWorldPos = points[firstVisitedIndex].transform.position;
-
-        // Переводим её на экран, чтобы узнать её точную глубину относительно объектива камеры
         Vector3 screenPoint = mainCamera.WorldToScreenPoint(refWorldPos);
-
-        // Собираем экранную позицию мыши, подставляя глубину нашей плоскости разреза
         Vector3 mouseScreenWithDepth = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
-
-        // Переводим из пикселей экрана в честные 3D мировые координаты
         Vector3 worldMousePos = mainCamera.ScreenToWorldPoint(mouseScreenWithDepth);
-
-        // Переводим полученную точку из МИРА в ЛОКАЛЬНЫЕ координаты нашей формы!
         Vector3 localMousePos = transform.InverseTransformPoint(worldMousePos);
 
-        // Жёстко фиксируем локальную глубину Z, чтобы линия шла ровно по бумаге и не уходила в пол
         localMousePos.z = zLocalOffset;
 
         dottedLineRenderer.positionCount = visitedCount + 1;
@@ -166,7 +158,6 @@ public class CuttableShape : MonoBehaviour
         visitedCount++;
         lastVisitedIndex = index;
 
-        // Переводим мировую позицию зеленой точки в локальные координаты формы
         Vector3 localPointPos = transform.InverseTransformPoint(point.transform.position);
         localPointPos.z = zLocalOffset;
 
@@ -219,6 +210,8 @@ public class CuttableShape : MonoBehaviour
         while (elapsedTime < cutAnimationDuration)
         {
             elapsedTime += Time.deltaTime;
+
+            // ЗДЕСЬ ВСЁ ИСПРАВЛЕНО (убрал дубликат слова progress)
             float progress = Mathf.Clamp01(elapsedTime / cutAnimationDuration);
 
             float currentPathTarget = progress * (totalPositions - 1);
@@ -263,7 +256,17 @@ public class CuttableShape : MonoBehaviour
         dottedLineRenderer.enabled = false;
         solidLineRenderer.enabled = false;
 
-        Instantiate(resultPrefab, spawnPoint != null ? spawnPoint.position : transform.position + Vector3.right * 2f, Quaternion.identity);
+        Vector3 finalSpawnPos = spawnPoint != null ? spawnPoint.position : transform.position + Vector3.right * 2f;
+
+        Instantiate(resultPrefab, finalSpawnPos, Quaternion.identity);
+
+        if (spawnParticlesPrefab != null)
+        {
+            Vector3 particlePos = finalSpawnPos + Camera.main.transform.forward * -0.1f;
+            GameObject fx = Instantiate(spawnParticlesPrefab, particlePos, Quaternion.identity);
+            Destroy(fx, 3f);
+        }
+
         Destroy(gameObject);
     }
 }
