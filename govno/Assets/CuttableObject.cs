@@ -16,12 +16,12 @@ public class CuttableShape : MonoBehaviour
     [Tooltip("Время анимации разреза в секундах")]
     [SerializeField] private float cutAnimationDuration = 0.8f;
 
-    [Tooltip("Множитель толщины для финальной линии (если она слишком толстая, поставьте например 0.3)")]
+    [Tooltip("Множитель толщины для финальной линии")]
     [Range(0.05f, 2f)]
     [SerializeField] private float solidLineWidthMultiplier = 0.3f;
 
-    [Tooltip("Смещение линии вперед, чтобы она не сливалась с фоном (попробуйте от -0.05 до -0.2)")]
-    [SerializeField] private float zOffset = -0.1f;
+    [Tooltip("Смещение линии вперед по локальной оси Z, чтобы она не сливалась с формой")]
+    [SerializeField] private float zLocalOffset = -0.1f;
 
     private int visitedCount = 0;
     private bool completed = false;
@@ -32,24 +32,17 @@ public class CuttableShape : MonoBehaviour
     private LineRenderer dottedLineRenderer; // Пунктир (основной)
     private LineRenderer solidLineRenderer;  // Сплошной (дочерний)
     private Camera mainCamera;
-    private Collider shapeCollider; // Коллайдер самой формы для детекта мыши
 
     private void Start()
     {
         mainCamera = Camera.main;
 
-        // Находим коллайдер на этом же объекте
-        shapeCollider = GetComponent<Collider>();
-        if (shapeCollider == null)
-        {
-            Debug.LogError("ВНИМАНИЕ! На объекте " + gameObject.name + " нет Collider! Добавь его, иначе линия не будет рисоваться.");
-        }
-
         dottedLineRenderer = GetComponent<LineRenderer>();
         dottedLineRenderer.positionCount = 0;
 
-        // ЖЁСТКО ВКЛЮЧАЕМ МИРОВЫЕ КООРДИНАТЫ ДЛЯ СТАБИЛЬНОСТИ
-        dottedLineRenderer.useWorldSpace = true;
+        // РАБОТАЕМ СТРОГО В ЛОКАЛЬНЫХ КООРДИНАТАХ ФОРМЫ (Линия никогда не утонет в полу)
+        dottedLineRenderer.useWorldSpace = false;
+        dottedLineRenderer.alignment = LineAlignment.View; // Смотрит широкой стороной на камеру
 
         // Автоматически создаем объект для красивой линии
         GameObject childObj = new GameObject("SolidLine_Animated");
@@ -57,8 +50,9 @@ public class CuttableShape : MonoBehaviour
 
         solidLineRenderer = childObj.AddComponent<LineRenderer>();
 
-        solidLineRenderer.useWorldSpace = true;
-        solidLineRenderer.alignment = dottedLineRenderer.alignment;
+        solidLineRenderer.useWorldSpace = false;
+        solidLineRenderer.alignment = LineAlignment.View;
+
         solidLineRenderer.widthCurve = dottedLineRenderer.widthCurve;
         solidLineRenderer.colorGradient = dottedLineRenderer.colorGradient;
         solidLineRenderer.sharedMaterial = solidLineMaterial;
@@ -83,20 +77,26 @@ public class CuttableShape : MonoBehaviour
 
     private void UpdateTrailingLine()
     {
-        // Стреляем физическим лучом из камеры в позицию мыши
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        // Получаем честную мировую позицию первой зеленой точки
+        Vector3 refWorldPos = points[firstVisitedIndex].transform.position;
 
-        // Проверяем удар только об коллайдер нашей формы
-        if (shapeCollider != null && shapeCollider.Raycast(ray, out RaycastHit hit, 100f))
-        {
-            Vector3 hitPoint = hit.point;
+        // Переводим её на экран, чтобы узнать её точную глубину относительно объектива камеры
+        Vector3 screenPoint = mainCamera.WorldToScreenPoint(refWorldPos);
 
-            // Немного сдвигаем точку к камере, чтобы она не утопала в объекте
-            hitPoint += mainCamera.transform.forward * zOffset;
+        // Собираем экранную позицию мыши, подставляя глубину нашей плоскости разреза
+        Vector3 mouseScreenWithDepth = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 
-            dottedLineRenderer.positionCount = visitedCount + 1;
-            dottedLineRenderer.SetPosition(visitedCount, hitPoint);
-        }
+        // Переводим из пикселей экрана в честные 3D мировые координаты
+        Vector3 worldMousePos = mainCamera.ScreenToWorldPoint(mouseScreenWithDepth);
+
+        // Переводим полученную точку из МИРА в ЛОКАЛЬНЫЕ координаты нашей формы!
+        Vector3 localMousePos = transform.InverseTransformPoint(worldMousePos);
+
+        // Жёстко фиксируем локальную глубину Z, чтобы линия шла ровно по бумаге и не уходила в пол
+        localMousePos.z = zLocalOffset;
+
+        dottedLineRenderer.positionCount = visitedCount + 1;
+        dottedLineRenderer.SetPosition(visitedCount, localMousePos);
     }
 
     private void OnMouseEnter()
@@ -166,12 +166,12 @@ public class CuttableShape : MonoBehaviour
         visitedCount++;
         lastVisitedIndex = index;
 
-        Vector3 pointPos = point.transform.position;
-        // Чуть сдвигаем точку к камере
-        pointPos += mainCamera.transform.forward * zOffset;
+        // Переводим мировую позицию зеленой точки в локальные координаты формы
+        Vector3 localPointPos = transform.InverseTransformPoint(point.transform.position);
+        localPointPos.z = zLocalOffset;
 
         dottedLineRenderer.positionCount = visitedCount;
-        dottedLineRenderer.SetPosition(visitedCount - 1, pointPos);
+        dottedLineRenderer.SetPosition(visitedCount - 1, localPointPos);
     }
 
     public void ResetProgress()
@@ -196,11 +196,11 @@ public class CuttableShape : MonoBehaviour
     {
         completed = true;
 
-        Vector3 startPos = startPoint.transform.position;
-        startPos += mainCamera.transform.forward * zOffset;
+        Vector3 localStartPos = transform.InverseTransformPoint(startPoint.transform.position);
+        localStartPos.z = zLocalOffset;
 
         dottedLineRenderer.positionCount = visitedCount + 1;
-        dottedLineRenderer.SetPosition(visitedCount, startPos);
+        dottedLineRenderer.SetPosition(visitedCount, localStartPos);
 
         if (CursorVisualController.Instance != null)
             CursorVisualController.Instance.SetInteractableState(false);
