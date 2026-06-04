@@ -16,23 +16,34 @@ public class CutPoint : MonoBehaviour
     {
         if (!Input.GetMouseButton(0)) return;
 
-        // УБИРАЕМ ЗДЕСЬ if (Visited) return;
-        // Теперь точка всегда сообщает о касании, а CuttableShape фильтрует
+        // Если менеджер почему-то потерял форму, принудительно напоминаем ему о ней
+        if (parent != null)
+        {
+            CutManager.Instance.StartCut(parent);
+        }
+
+        // Отправляем данные в менеджер, как и было изначально
         CutManager.Instance.VisitPoint(this);
     }
 
     public void MarkVisited()
     {
         Visited = true;
-        if (TryGetComponent<Renderer>(out var r))
-            r.material.color = Color.green;
+        // Ищет Renderer в том числе на ваших дочерних кастомных 3D-моделях точек
+        Renderer r = GetComponentInChildren<Renderer>();
+        if (r != null)
+        {
+            r.material.color = Color.green; // Или любая ваша логика подсветки
+        }
     }
 
     public void ResetPoint()
     {
         Visited = false;
-        // Возвращаем исходный цвет (например, белый)
-        if (TryGetComponent<Renderer>(out var r))
+        Renderer r = GetComponentInChildren<Renderer>();
+        if (r != null)
+        {
             r.material.color = Color.white;
+        }
     }
 }

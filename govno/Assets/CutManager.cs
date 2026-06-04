@@ -14,7 +14,7 @@ public class CutManager : MonoBehaviour
 
     private void Update()
     {
-        // Самый важный момент: если кнопка отпущена — сбрасываем всё
+        // Если кнопка отпущена — сбрасываем прогресс текущей формы
         if (Input.GetMouseButtonUp(0))
         {
             StopCut();
@@ -25,7 +25,7 @@ public class CutManager : MonoBehaviour
     {
         if (currentShape != null)
         {
-            currentShape.ResetProgress(); // Вызываем полный сброс
+            currentShape.ResetProgress();
         }
         currentShape = null;
     }
@@ -33,7 +33,7 @@ public class CutManager : MonoBehaviour
     public void VisitPoint(CutPoint point)
     {
         if (currentShape == null) return;
-        // Передаем касание, только если кнопка зажата
+
         if (Input.GetMouseButton(0))
         {
             currentShape.VisitPoint(point);

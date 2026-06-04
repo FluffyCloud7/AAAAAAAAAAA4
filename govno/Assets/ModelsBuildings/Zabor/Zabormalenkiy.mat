@@ -64,8 +64,8 @@ Material:
     - _QueueOffset: 0
     - _Smoothness: 0
     m_Colors:
-    - _Color_Real: {r: 0.6886792, g: 0.5829975, b: 0.4515397, a: 1}
-    - _DarkThingies: {r: 0.1981132, g: 0.111417904, b: 0.06634924, a: 1}
+    - _Color_Real: {r: 0.6509434, g: 0.6509434, b: 0.6509434, a: 1}
+    - _DarkThingies: {r: 0.1509434, g: 0.13890228, b: 0.13314347, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &6426463030372771580
