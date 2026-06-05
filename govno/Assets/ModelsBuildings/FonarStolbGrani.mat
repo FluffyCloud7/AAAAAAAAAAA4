@@ -38,7 +38,7 @@ Material:
     - _Paper_Scale: 5
     - _Smoothness: 0.2
     m_Colors:
-    - _Color_Real: {r: 0.9981182, g: 1, b: 0.94811314, a: 1}
+    - _Color_Real: {r: 0.7688679, g: 0.88053375, b: 1, a: 1}
     - _DarkThingies: {r: 0.8301887, g: 0.7314209, b: 0.5051619, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
