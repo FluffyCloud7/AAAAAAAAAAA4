@@ -21,7 +21,6 @@ public class SpongeCleaner : MonoBehaviour
     public MeshRenderer spongeRenderer;
     private Material spongeMaterial;
 
-    // Переменные для отслеживания движения губки
     private Vector3 lastPosition;
     private float movementThreshold = 0.01f;
 
@@ -36,7 +35,6 @@ public class SpongeCleaner : MonoBehaviour
         {
             spongeMaterial = spongeRenderer.material;
 
-            // Передаем текстуры в Shader Graph по именам из твоего Blackboard
             if (cleanSpongeTexture != null && spongeMaterial.HasProperty("_BaseTexture"))
             {
                 spongeMaterial.SetTexture("_BaseTexture", cleanSpongeTexture);
@@ -72,21 +70,16 @@ public class SpongeCleaner : MonoBehaviour
 
         RaycastHit hit;
 
-        // ТВОЙ ОРИГИНАЛЬНЫЙ ЛУЧ
         if (Physics.Raycast(rayOrigin, downDirection, out hit, rayDistance, inkLayerMask, QueryTriggerInteraction.Ignore))
         {
-            // Ищем оригинальный GPU скрипт лужи
             InkSystem ink = hit.collider.GetComponent<InkSystem>();
             if (ink != null)
             {
-                // Вызываем стирание напрямую по твоей логике
                 ink.Erase(hit.textureCoord, eraseRadius);
 
-                // Проверяем движение губки
                 float distanceMoved = Vector3.Distance(transform.position, lastPosition);
                 if (distanceMoved > movementThreshold)
                 {
-                    // Пачкается только при движении по грязи
                     currentInkAmount += absorptionRate;
                     currentInkAmount = Mathf.Clamp(currentInkAmount, 0f, maxInkCapacity);
                     UpdateSpongeVisual();
@@ -104,7 +97,6 @@ public class SpongeCleaner : MonoBehaviour
         {
             float progress = currentInkAmount / maxInkCapacity;
 
-            // Крутим ползунок прогресса в Shader Graph
             if (spongeMaterial.HasProperty("_SpongeDirtProgress"))
             {
                 spongeMaterial.SetFloat("_SpongeDirtProgress", progress);
@@ -112,10 +104,11 @@ public class SpongeCleaner : MonoBehaviour
         }
     }
 
+    // МЕТОД ОЧИЩЕНИЯ: Вызывается скриптом воды при входе в триггер
     public void WashSponge()
     {
-        currentInkAmount = 0f;
-        UpdateSpongeVisual();
+        currentInkAmount = 0f; // Сбрасываем счетчик грязи в ноль
+        UpdateSpongeVisual();  // Возвращаем шейдер в чистое желтое состояние
     }
 
     private void OnMouseEnter()
