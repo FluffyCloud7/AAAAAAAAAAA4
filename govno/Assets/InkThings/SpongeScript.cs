@@ -21,11 +21,24 @@ public class SpongeCleaner : MonoBehaviour
     public MeshRenderer spongeRenderer;
     private Material spongeMaterial;
 
+    // Переменные для отслеживания движения губки
     private Vector3 lastPosition;
     private float movementThreshold = 0.01f;
 
+    // Авто-чекпоинт позиции (чтобы не бегать за ней в начало уровня)
+    private Vector3 safeSpawnPosition;
+    private Quaternion safeSpawnRotation;
+    private Rigidbody rb;
+    private float checkpointTimer = 0f;
+
     void Start()
     {
+        // По умолчанию стартовая точка — безопасная
+        safeSpawnPosition = transform.position;
+        safeSpawnRotation = transform.rotation;
+
+        rb = GetComponent<Rigidbody>();
+
         if (spongeRenderer == null)
         {
             spongeRenderer = GetComponent<MeshRenderer>();
@@ -52,7 +65,9 @@ public class SpongeCleaner : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Если губка заполнена — стоп работа
+        // Обновляем точку сохранения, если губка спокойно лежит на твердой поверхности и не двигается
+        UpdateSafeCheckpoint();
+
         if (currentInkAmount >= maxInkCapacity)
         {
             Debug.DrawRay(transform.position + Vector3.up * 1.0f, Vector3.down * rayDistance, Color.gray);
@@ -91,6 +106,36 @@ public class SpongeCleaner : MonoBehaviour
         Debug.DrawRay(rayOrigin, downDirection * rayDistance, Color.red);
     }
 
+    // Логика умного чекпоинта
+    private void UpdateSafeCheckpoint()
+    {
+        if (rb == null) return;
+
+        // Если губка почти не двигается (скорость близка к нулю)
+        if (rb.linearVelocity.sqrMagnitude < 0.01f)
+        {
+            checkpointTimer += Time.fixedDeltaTime;
+
+            // Если она стабильно лежит дольше 0.5 секунд, пускаем короткий луч вниз проверки земли
+            if (checkpointTimer > 0.5f)
+            {
+                // Проверяем, что под нами твердый пол, а не триггер бездны
+                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 1.5f, ~LayerMask.GetMask("InkPuddle"), QueryTriggerInteraction.Ignore))
+                {
+                    // Сохраняем это место как безопасное
+                    safeSpawnPosition = transform.position + Vector3.up * 0.1f; // чуть приподнимем, чтоб не застревала в полу
+                    safeSpawnRotation = transform.rotation;
+                }
+                checkpointTimer = 0f;
+            }
+        }
+        else
+        {
+            // Если губка летит или игрок её тащит — сбрасываем таймер
+            checkpointTimer = 0f;
+        }
+    }
+
     private void UpdateSpongeVisual()
     {
         if (spongeMaterial != null)
@@ -104,11 +149,25 @@ public class SpongeCleaner : MonoBehaviour
         }
     }
 
-    // МЕТОД ОЧИЩЕНИЯ: Вызывается скриптом воды при входе в триггер
     public void WashSponge()
     {
-        currentInkAmount = 0f; // Сбрасываем счетчик грязи в ноль
-        UpdateSpongeVisual();  // Возвращаем шейдер в чистое желтое состояние
+        currentInkAmount = 0f;
+        UpdateSpongeVisual();
+    }
+
+    // МЕТОД РЕСПАВНА: Возвращает конкретную губку на её ПОСЛЕДНЕЕ безопасное место
+    public void RespawnSponge()
+    {
+        transform.position = safeSpawnPosition;
+        transform.rotation = safeSpawnRotation;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        WashSponge();
     }
 
     private void OnMouseEnter()
