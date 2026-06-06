@@ -37,6 +37,6 @@ Material:
     - _TwirlStrength: 11.04
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.41253605, g: 0.68395656, b: 1.860801, a: 1}
+    - _Color: {r: 0.9124704, g: 1.8608011, b: 0.41892377, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

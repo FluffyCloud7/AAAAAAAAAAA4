@@ -8,24 +8,21 @@ public class PlayerGrabIso : MonoBehaviour
     public KeyCode grabKey = KeyCode.E;
 
     [Header("Настройки летающих предметов")]
-    public float floatHeight = 2.2f;       // Высота полета над игроком (уровень головы)
-    public float floatRadius = 0.6f;       // Радиус орбиты хоровода вокруг головы
-    public float followSpeed = 12f;        // Скорость следования за игроком
-    public float orbitSpeed = 120f;        // Скорость вращения предметов по орбите вокруг головы
-    public float spacing = 0.5f;           // Оставлено для совместимости
+    public float floatHeight = 2.2f;
+    public float floatRadius = 0.6f;
+    public float followSpeed = 12f;
+    public float orbitSpeed = 120f;
+    public float spacing = 0.5f;
 
-    // Слот для тяжелого предмета (в руках)
     private GameObject heldHeavyObject;
     private Rigidbody heldHeavyRb;
     private Collider heldHeavyCollider;
 
-    // Список для легких предметов (над головой)
     private List<GameObject> floatingObjects = new List<GameObject>();
 
     private Collider playerCollider;
     private Animator animator;
 
-    // Текущий накопительный угол для синхронного вращения всего хоровода
     private float currentOrbitAngle = 0f;
 
     void Start()
@@ -36,30 +33,18 @@ public class PlayerGrabIso : MonoBehaviour
 
     void Update()
     {
-        // Кнопка E отвечает за диалоги/взаимодействия, а затем за коробки
         if (Input.GetKeyDown(grabKey))
         {
-            if (TryInteractWithNearby())
-                return;
+            if (TryInteractWithNearby()) return;
 
-            if (heldHeavyObject == null)
-            {
-                TryGrabHeavy();
-            }
-            else
-            {
-                DropHeavy();
-            }
+            if (heldHeavyObject == null) TryGrabHeavy();
+            else DropHeavy();
         }
 
-        if (heldHeavyObject != null)
-            FollowHoldPoint();
-
-        if (floatingObjects.Count > 0)
-            UpdateFloatingObjects();
+        if (heldHeavyObject != null) FollowHoldPoint();
+        if (floatingObjects.Count > 0) UpdateFloatingObjects();
     }
 
-    // --- АВТОМАТИЧЕСКИЙ ПОДБОР ЛЕГКИХ ПРЕДМЕТОВ ПРИ СТОЛКНОВЕНИИ ---
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Grabbable"))
@@ -68,12 +53,12 @@ public class PlayerGrabIso : MonoBehaviour
 
             if (item != null && item.itemSize == ItemSize.LightFloating)
             {
-                GameObject lightObj = other.gameObject;
+                item.SetPickedUp(true); // Отключаем покачивание
 
+                GameObject lightObj = other.gameObject;
                 if (floatingObjects.Contains(lightObj)) return;
 
                 Rigidbody lightRb = lightObj.GetComponent<Rigidbody>();
-
                 if (lightRb != null)
                 {
                     lightRb.useGravity = false;
@@ -82,42 +67,36 @@ public class PlayerGrabIso : MonoBehaviour
 
                 Physics.IgnoreCollision(playerCollider, other, true);
                 floatingObjects.Add(lightObj);
-
-                Debug.Log($"Автоматически подобран легкий предмет: {item.itemName}");
             }
         }
     }
 
-    // --- ВЗАИМОДЕЙСТВИЕ С ИНТЕРАКТИВНЫМИ ОБЪЕКТАМИ (NPC) ---
     bool TryInteractWithNearby()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, grabRange);
-
         foreach (var hit in hits)
         {
             IInteractable interactable = hit.GetComponentInParent<IInteractable>();
-
             if (interactable != null && interactable.CanInteract())
             {
                 interactable.Interact();
                 return true;
             }
         }
-
         return false;
     }
 
-    // Логика ручного поднятия коробки
     void TryGrabHeavy()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, grabRange);
-
         foreach (Collider hit in hits)
         {
             if (hit.CompareTag("Grabbable"))
             {
                 GrabbableItem item = hit.GetComponent<GrabbableItem>();
                 if (item == null || item.itemSize != ItemSize.HeavyInHands) continue;
+
+                item.SetPickedUp(true); // Отключаем покачивание
 
                 heldHeavyObject = hit.gameObject;
                 heldHeavyRb = heldHeavyObject.GetComponent<Rigidbody>();
@@ -144,7 +123,6 @@ public class PlayerGrabIso : MonoBehaviour
         heldHeavyObject.transform.rotation = transform.rotation;
     }
 
-    // --- МАГИЯ ОРБИТАЛЬНОГО ХОРОВОДА ---
     void UpdateFloatingObjects()
     {
         currentOrbitAngle += orbitSpeed * Time.deltaTime;
@@ -154,7 +132,6 @@ public class PlayerGrabIso : MonoBehaviour
         if (count == 0) return;
 
         float angleStep = 360f / count;
-
         for (int i = 0; i < count; i++)
         {
             if (floatingObjects[i] == null) continue;
@@ -172,77 +149,50 @@ public class PlayerGrabIso : MonoBehaviour
                 targetPos,
                 Time.deltaTime * followSpeed
             );
-
             floatingObjects[i].transform.Rotate(Vector3.up, orbitSpeed * Time.deltaTime, Space.World);
         }
     }
 
     void DropHeavy()
     {
-        if (heldHeavyRb != null)
+        if (heldHeavyObject != null)
         {
-            heldHeavyRb.useGravity = true;
-            heldHeavyRb.isKinematic = false;
+            GrabbableItem item = heldHeavyObject.GetComponent<GrabbableItem>();
+            if (item != null) item.SetPickedUp(false); // Включаем покачивание снова
+
+            if (heldHeavyRb != null)
+            {
+                heldHeavyRb.useGravity = true;
+                heldHeavyRb.isKinematic = false;
+            }
+
+            if (playerCollider != null && heldHeavyCollider != null)
+                Physics.IgnoreCollision(playerCollider, heldHeavyCollider, false);
+
+            if (animator != null) animator.SetBool("IsHoldingHeavy", false);
         }
-
-        if (playerCollider != null && heldHeavyCollider != null)
-            Physics.IgnoreCollision(playerCollider, heldHeavyCollider, false);
-
-        if (animator != null) animator.SetBool("IsHoldingHeavy", false);
 
         heldHeavyObject = null;
         heldHeavyRb = null;
         heldHeavyCollider = null;
     }
 
-    public bool UseFloatingItem(string nameToUse)
-    {
-        for (int i = 0; i < floatingObjects.Count; i++)
-        {
-            GrabbableItem item = floatingObjects[i].GetComponent<GrabbableItem>();
-            if (item != null && item.itemName == nameToUse)
-            {
-                GameObject obj = floatingObjects[i];
-                floatingObjects.RemoveAt(i);
-                Destroy(obj);
-                return true;
-            }
-        }
-        return false;
-    }
+    // ВОЗВРАЩЕНЫ НУЖНЫЕ МЕТОДЫ:
+    public GameObject GetHeavyObject() => heldHeavyObject;
+    public List<GameObject> GetFloatingObjectsList() => floatingObjects;
 
-    // --- МЕТОДЫ ДЛЯ ПЕРЕНОСА ПРЕДМЕТОВ МЕЖДУ СЦЕНАМИ ---
-
-    // Отдает менеджеру текущую тяжелую коробку
-    public GameObject GetHeavyObject()
-    {
-        return heldHeavyObject;
-    }
-
-    // Отдает менеджеру список летающих предметов
-    public List<GameObject> GetFloatingObjectsList()
-    {
-        return floatingObjects;
-    }
-
-    // Принудительно возвращает предметы в логику игрока после загрузки сцены
     public void RestoreGrabbedItems(GameObject heavyObj, List<GameObject> targetsFloating)
     {
-        // Возвращаем тяжелый предмет
         if (heavyObj != null)
         {
             heldHeavyObject = heavyObj;
             heldHeavyRb = heldHeavyObject.GetComponent<Rigidbody>();
             heldHeavyCollider = heldHeavyObject.GetComponent<Collider>();
-
-            // На всякий случай обновляем игнорирование коллизий на новой сцене
             if (playerCollider != null && heldHeavyCollider != null)
                 Physics.IgnoreCollision(playerCollider, heldHeavyCollider, true);
-
             if (animator != null) animator.SetBool("IsHoldingHeavy", true);
         }
 
-        // Возвращаем хоровод
         floatingObjects.Clear();
         if (targetsFloating != null)
         {
@@ -253,7 +203,6 @@ public class PlayerGrabIso : MonoBehaviour
                     Collider col = obj.GetComponent<Collider>();
                     if (playerCollider != null && col != null)
                         Physics.IgnoreCollision(playerCollider, col, true);
-
                     floatingObjects.Add(obj);
                 }
             }
