@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Grabbable
   - Draggable
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Paper
   - InkPuddle
   - Player
-  - 
+  - CuttingPoints
   - 
   - 
   - 

@@ -786,6 +786,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 5ec670a8b8818ac498873a53e95f07f4, type: 2}
+    - target: {fileID: -804731622281664130, guid: 2fcd0521e14069e4682ab4c9325ef753, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3af91e2e19137474da7be373f3b44c9c, type: 2}
     - target: {fileID: 919132149155446097, guid: 2fcd0521e14069e4682ab4c9325ef753, type: 3}
       propertyPath: m_Name
       value: OgromnayaKvadratnayaColonna
@@ -7437,7 +7441,7 @@ GameObject:
   - component: {fileID: 200129707}
   - component: {fileID: 200129706}
   - component: {fileID: 200129708}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8048,10 +8052,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CursorVisualController
   triangleCursor: {fileID: 1393171398}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
-  interactableColor: {r: 0.3873129, g: 0, b: 1, a: 1}
+  interactableColor: {r: 0.7108489, g: 0.9245283, b: 0.501513, a: 1}
   normalSprite: {fileID: 21300000, guid: 0dc2d47ee2e7bce4e95d5beb88513bd6, type: 3}
   interactableSprite: {fileID: 21300000, guid: 0dc2d47ee2e7bce4e95d5beb88513bd6, type: 3}
   cursorRoot: {fileID: 1338156888}
+  interactableLayers:
+    serializedVersion: 2
+    m_Bits: 4864
+  rayDistance: 100
 --- !u!4 &239589236
 Transform:
   m_ObjectHideFlags: 0
@@ -10436,7 +10444,7 @@ GameObject:
   - component: {fileID: 364316569}
   - component: {fileID: 364316568}
   - component: {fileID: 364316567}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25493,7 +25501,7 @@ GameObject:
   - component: {fileID: 665237109}
   - component: {fileID: 665237108}
   - component: {fileID: 665237110}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49276,7 +49284,7 @@ GameObject:
   - component: {fileID: 975449657}
   - component: {fileID: 975449656}
   - component: {fileID: 975449655}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49863,7 +49871,7 @@ GameObject:
   - component: {fileID: 1013470948}
   - component: {fileID: 1013470947}
   - component: {fileID: 1013470949}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55523,7 +55531,7 @@ GameObject:
   - component: {fileID: 1068471098}
   - component: {fileID: 1068471097}
   - component: {fileID: 1068471096}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58329,7 +58337,7 @@ GameObject:
   - component: {fileID: 1301074510}
   - component: {fileID: 1301074509}
   - component: {fileID: 1301074508}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65222,7 +65230,7 @@ GameObject:
   - component: {fileID: 1447172172}
   - component: {fileID: 1447172171}
   - component: {fileID: 1447172170}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65946,6 +65954,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 5ec670a8b8818ac498873a53e95f07f4, type: 2}
+    - target: {fileID: -804731622281664130, guid: 2fcd0521e14069e4682ab4c9325ef753, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3af91e2e19137474da7be373f3b44c9c, type: 2}
     - target: {fileID: 919132149155446097, guid: 2fcd0521e14069e4682ab4c9325ef753, type: 3}
       propertyPath: m_Name
       value: OgromnayaKvadratnayaColonna (1)
@@ -67505,7 +67517,7 @@ GameObject:
   - component: {fileID: 1581995696}
   - component: {fileID: 1581995695}
   - component: {fileID: 1581995697}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76628,7 +76640,7 @@ GameObject:
   - component: {fileID: 1854973089}
   - component: {fileID: 1854973088}
   - component: {fileID: 1854973087}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: CutPoint1 (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -77644,7 +77656,7 @@ Transform:
   m_GameObject: {fileID: 1922884939}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -136.66, y: 21.54, z: -19.41}
+  m_LocalPosition: {x: -133.08, y: 29.93, z: 28.81}
   m_LocalScale: {x: 0.78, y: 0.78, z: 0.78}
   m_ConstrainProportionsScale: 1
   m_Children: []

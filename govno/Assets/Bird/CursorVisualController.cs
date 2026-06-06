@@ -11,7 +11,7 @@ public class CursorVisualController : MonoBehaviour
 
     [Header("Interactable Settings")]
     public Color normalColor = Color.white;
-    public Color interactableColor = Color.purple; // Твой фиолетовый цвет из инспектора
+    public Color interactableColor = Color.purple;
 
     [Space]
     public Sprite normalSprite;
@@ -20,7 +20,12 @@ public class CursorVisualController : MonoBehaviour
     [Header("Movement")]
     public RectTransform cursorRoot;
 
+    [Header("Raycast Setup")]
+    public LayerMask interactableLayers; // Сюда в инспекторе выбери слои бумаги, губки и т.д.
+    public float rayDistance = 100f;
+
     private bool isHoveringInteractable = false;
+    private Camera mainCam;
 
     private void Awake()
     {
@@ -29,6 +34,7 @@ public class CursorVisualController : MonoBehaviour
         {
             triangleImage = triangleCursor.GetComponent<Image>();
         }
+        mainCam = Camera.main;
     }
 
     void Update()
@@ -37,14 +43,8 @@ public class CursorVisualController : MonoBehaviour
             return;
 
         UpdateCursorPosition();
+        CheckForInteractableObjects(); // Сам проверяет, наведены ли мы на что-то
         UpdateCursorVisual();
-    }
-
-    // LateUpdate выполняется ПОСЛЕ того, как все объекты (бумага, губка, вырезы) посчитали свои лучи
-    void LateUpdate()
-    {
-        // Сбрасываем флаг для следующего кадра
-        isHoveringInteractable = false;
     }
 
     void UpdateCursorPosition()
@@ -55,13 +55,36 @@ public class CursorVisualController : MonoBehaviour
         }
     }
 
+    private void CheckForInteractableObjects()
+    {
+        if (mainCam == null) mainCam = Camera.main;
+        if (mainCam == null) return;
+
+        // Пускаем луч из камеры через позицию мыши
+        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactableLayers))
+        {
+            // Проверяем, есть ли на объекте скрипт губки или бумаги или общий маркер интерактивности
+            bool hasInteractable = hit.transform.GetComponent<InteractableObject>() != null ||
+                                   hit.transform.GetComponent<RigidPageCurl>() != null ||
+                                   hit.transform.GetComponent<SpongeCleaner>() != null;
+
+            if (hasInteractable)
+            {
+                isHoveringInteractable = true;
+                return;
+            }
+        }
+
+        // Если луч никуда не попал или попал не туда — выключаем подсветку
+        isHoveringInteractable = false;
+    }
+
+    // Этот метод можно оставить для экстренных случаев (например, во время перетаскивания)
     public void SetInteractableState(bool isOverInteractable)
     {
-        // Если хотя бы один скрипт в этом кадре сказал true — флаг останется true
-        if (isOverInteractable)
-        {
-            isHoveringInteractable = true;
-        }
+        isHoveringInteractable = isOverInteractable;
     }
 
     void UpdateCursorVisual()
@@ -78,7 +101,6 @@ public class CursorVisualController : MonoBehaviour
             case InputMode.Dialogue:
             case InputMode.UI:
                 if (triangleCursor != null) triangleCursor.SetActive(true);
-
                 ApplyInteractableVisual();
                 break;
         }

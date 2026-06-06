@@ -43,7 +43,7 @@ public class RigidPageCurl : MonoBehaviour
     {
         HandleInput();
         DeformMesh();
-        CheckCursorHover(); // ПРОВЕРЯЕМ НАВЕДЕНИЕ КАЖДЫЙ КАДР
+        CheckCursorHover();
     }
 
     void HandleInput()
@@ -80,52 +80,12 @@ public class RigidPageCurl : MonoBehaviour
         }
     }
 
-    // НОВАЯ ФУНКЦИЯ ДЛЯ ТВОЕГО КУРСОРА
     void CheckCursorHover()
     {
-        if (cam == null) return;
-
-        bool isOverThisPaper = false;
-
-        // Если мы уже тащим эту бумагу — курсор точно должен быть активным
-        if (dragging)
+        // Если страницу тащат, принудительно заставляем курсор светиться фиолетовым
+        if (dragging && CursorVisualController.Instance != null)
         {
-            isOverThisPaper = true;
-        }
-        else
-        {
-            // Пускаем луч из камеры, чтобы проверить, смотрим ли мы на бумагу прямо сейчас
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, paperLayer))
-            {
-                if (hit.transform == transform)
-                {
-                    isOverThisPaper = true;
-                }
-            }
-        }
-
-        // Обновляем визуал курсора
-        if (CursorVisualController.Instance != null)
-        {
-            // Так как листов может быть несколько, мы включаем подсветку только если луч попал именно в этот скрипт.
-            // Если луч ушел — этот скрипт безопасно выключит подсветку.
-            if (isOverThisPaper)
-            {
-                CursorVisualController.Instance.SetInteractableState(true);
-            }
-            else if (CursorVisualController.Instance.triangleCursor.activeSelf && !dragging)
-            {
-                // Дополнительная проверка, чтобы не сбивать подсветку, если мы тащим что-то другое
-            }
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (CursorVisualController.Instance != null)
-        {
-            CursorVisualController.Instance.SetInteractableState(false);
+            CursorVisualController.Instance.SetInteractableState(true);
         }
     }
 
