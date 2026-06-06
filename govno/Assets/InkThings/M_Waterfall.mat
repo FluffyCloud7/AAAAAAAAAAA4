@@ -33,7 +33,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FadePower: 0.94
+    - _FadeOffset: 0.84
+    - _FadePower: 0.52
     - _ScrollSpeedX: 0
     - _ScrollSpeedY: 1
     m_Colors:

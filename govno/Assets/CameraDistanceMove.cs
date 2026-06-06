@@ -31,11 +31,11 @@ public class CameraDistanceMove : MonoBehaviour
     private float currentDistance;
     private float currentTilt;
 
-    // Храним дефолтные оффсеты, чтобы знать, от чего отталкиваться
+    // Базовые оффсеты
     private Vector3 defaultShoulderOffset;
     private Vector3 defaultTrackedObjectOffset;
 
-    // Накопленное смещение от мыши
+    // Накопленный сдвиг (в системе координат экрана: X - право/лево, Z - верх/низ)
     private Vector3 currentPanOffset;
     private Vector3 targetPanOffset;
 
@@ -49,7 +49,6 @@ public class CameraDistanceMove : MonoBehaviour
         defaultDistance = GetDistance();
         defaultTilt = vcam.transform.localEulerAngles.x;
 
-        // Запоминаем стартовые оффсеты из инспектора
         if (thirdPerson != null) defaultShoulderOffset = thirdPerson.ShoulderOffset;
         if (framing != null) defaultTrackedObjectOffset = framing.m_TrackedObjectOffset;
 
@@ -78,22 +77,20 @@ public class CameraDistanceMove : MonoBehaviour
         Quaternion targetRotation = Quaternion.Euler(currentTilt, 0f, 0f);
         vcam.transform.localRotation = targetRotation;
 
-        // 2. Расчет сдвига к краям экрана
+        // 2. Логика сдвига к краям экрана
         if (mouseMode)
         {
             CalculateEdgePanning();
         }
         else
         {
-            // Если переключились обратно — плавно возвращаем оффсет в ноль
             targetPanOffset = Vector3.zero;
         }
 
-        // Интерполируем накопленный оффсет
         currentPanOffset = Vector3.Lerp(currentPanOffset, targetPanOffset, Time.deltaTime * panSpeed);
         ApplyOffset(currentPanOffset);
 
-        // 3. Вес Volume эффекта
+        // 3. Управление весом Volume
         float targetWeight = mouseMode ? 1f : 0f;
         volumeWeight = Mathf.Lerp(volumeWeight, targetWeight, Time.deltaTime * effectSmooth);
 
@@ -110,6 +107,7 @@ public class CameraDistanceMove : MonoBehaviour
 
         Vector3 moveDirection = Vector3.zero;
 
+        // Точно так же, как в первом (рабочем) коде:
         if (normalizedX >= 1f - edgeBoundary) moveDirection.x = 1f;
         else if (normalizedX <= edgeBoundary) moveDirection.x = -1f;
 
@@ -119,9 +117,7 @@ public class CameraDistanceMove : MonoBehaviour
         if (moveDirection.sqrMagnitude > 0)
         {
             moveDirection.Normalize();
-            // Прибавляем смещение
             targetPanOffset += moveDirection * panSpeed * Time.deltaTime;
-            // Ограничиваем, чтобы не улететь бесконечно далеко
             targetPanOffset = Vector3.ClampMagnitude(targetPanOffset, maxPanDistance);
         }
     }
@@ -141,14 +137,25 @@ public class CameraDistanceMove : MonoBehaviour
 
     void ApplyOffset(Vector3 offset)
     {
-        // Применяем смещение КОРРЕКТНО относительно базовых настроек
+        if (vcam.Follow == null) return;
+
+        // СЕКРЕТ КОРРЕКТНОЙ РАБОТЫ:
+        // Чтобы оффсет не зависел от поворота персонажа, мы берем наш чистый экранный сдвиг (offset)
+        // и вращаем его обратно ПОД ПОВОРОТ ПЕРСОНАЖА. Таким образом, когда Cinemachine внутри себя
+        // умножит оффсет на разворот персонажа, они взаимно уничтожатся, и камера сдвинется строго по экрану.
+        Quaternion targetRotationCompensate = Quaternion.Inverse(vcam.Follow.rotation);
+        Vector3 compensatedOffset = targetRotationCompensate * offset;
+
+        // Убираем влияние наклона по высоте, оставляем только чистый плоский сдвиг
+        compensatedOffset.y = 0f;
+
         if (thirdPerson != null)
         {
-            thirdPerson.ShoulderOffset = defaultShoulderOffset + offset;
+            thirdPerson.ShoulderOffset = defaultShoulderOffset + compensatedOffset;
         }
         else if (framing != null)
         {
-            framing.m_TrackedObjectOffset = defaultTrackedObjectOffset + offset;
+            framing.m_TrackedObjectOffset = defaultTrackedObjectOffset + compensatedOffset;
         }
     }
 }
