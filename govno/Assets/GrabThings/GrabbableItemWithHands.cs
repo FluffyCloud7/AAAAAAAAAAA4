@@ -12,4 +12,7 @@ public class GrabbableItem : MonoBehaviour
 
     // —юда можно дописать уникальный ID предмета или им€ дл€ логики квестов
     public string itemName = "Item";
+
+    [Header("”никальный ID предмета дл€ сохранени€ между сценами")]
+    public string uniqueID;
 }
