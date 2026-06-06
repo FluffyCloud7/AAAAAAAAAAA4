@@ -26,6 +26,8 @@ MonoBehaviour:
     m_path: Assets/Scenes/MainMenu.unity
   - m_enabled: 1
     m_path: Assets/Scenes/TutorialLast.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/MalBashn.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
