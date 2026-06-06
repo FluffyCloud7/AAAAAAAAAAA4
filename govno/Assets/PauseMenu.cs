@@ -1,12 +1,17 @@
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI; // <-- Добавили для работы со слайдерами
 
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenuUI;
     public string mainMenuScene = "MainMenu";
     public PlayerHealth player;
+
+    [Header("Настройки аудио-ползунков")]
+    public Slider musicSlider; // Привяжи сюда слайдер музыки в инспекторе
+    public Slider sfxSlider;   // Привяжи сюда слайдер звуков в инспекторе
 
     private bool isPaused = false;
 
@@ -16,6 +21,17 @@ public class PauseMenu : MonoBehaviour
     {
         // Меню начинается закрытым
         pauseAnimator.SetBool("IsOpen", false);
+
+        // Передаем ползунки в менеджеры и восстанавливаем сохраненные уровни громкости
+        if (musicSlider != null && MusicManager.Instance != null)
+        {
+            MusicManager.Instance.BindSlider(musicSlider);
+        }
+
+        if (sfxSlider != null && SoundEffectLibrary.Instance != null)
+        {
+            SoundEffectLibrary.Instance.BindSlider(sfxSlider);
+        }
     }
 
     void Update()
@@ -74,12 +90,10 @@ public class PauseMenu : MonoBehaviour
     // НАШ НОВЫЙ МЕТОД ДЛЯ ВЫХОДА
     public void QuitGame()
     {
-        // Этот код сработает в скомпилированном билде (.exe, .apk и т.д.)
         Application.Quit();
 
-        // Этот код сработает ТОЛЬКО внутри редактора Unity, чтобы вы видели, что кнопка нажата
 #if UNITY_EDITOR
-        Encoding unityEditor = null; // Просто заглушка для компилятора, если нужно
+        Encoding unityEditor = null;
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
     }

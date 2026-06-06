@@ -11,6 +11,7 @@ public class TransitionManager : MonoBehaviour
     [HideInInspector] public string targetDoorID;
     private GameObject playerObject;
     private GameObject cameraSystemRoot;
+    private CinemachineFreeLook persistentFreeLookCam; // <-- Прямая ссылка на рабочую Синемашину
 
     private GameObject savedHeavyObject;
     private List<GameObject> savedFloatingObjects = new List<GameObject>();
@@ -81,11 +82,12 @@ public class TransitionManager : MonoBehaviour
             Debug.Log($"[Transition] Корневой объект камеры {cameraSystemRoot.name} защищен через DontDestroyOnLoad.");
         }
 
-        CinemachineFreeLook freeLookCam = FindObjectOfType<CinemachineFreeLook>();
-        if (freeLookCam != null)
+        // Кэшируем оригинальную Синемашину перед уничтожением сцены
+        persistentFreeLookCam = FindObjectOfType<CinemachineFreeLook>();
+        if (persistentFreeLookCam != null)
         {
-            DontDestroyOnLoad(freeLookCam.gameObject);
-            Debug.Log($"[Transition] Синемашина {freeLookCam.gameObject.name} защищена через DontDestroyOnLoad.");
+            DontDestroyOnLoad(persistentFreeLookCam.gameObject);
+            Debug.Log($"[Transition] Синемашина {persistentFreeLookCam.gameObject.name} защищена через DontDestroyOnLoad.");
         }
 
         StartCoroutine(LoadSceneRoutine(sceneName));
@@ -102,6 +104,7 @@ public class TransitionManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
         Debug.Log($"<color=green>[Transition] 1. Сцена {sceneName} успешно загружена асинхронно.</color>");
 
+        // Безопасная очистка дубликатов аудиослушателей
         CleanupAudioListeners();
 
         // --- ФИКС ДУБЛИКАТА ИГРОКА ---
@@ -115,6 +118,32 @@ public class TransitionManager : MonoBehaviour
                 Destroy(p);
             }
         }
+
+        // --- ФИКС ДУБЛИКАТОВ КАМЕРЫ И СИНЕМАШИНЫ ---
+        CinemachineFreeLook[] freeLookCams = FindObjectsByType<CinemachineFreeLook>(FindObjectsSortMode.None);
+        foreach (var cam in freeLookCams)
+        {
+            if (persistentFreeLookCam != null && cam != persistentFreeLookCam)
+            {
+                Debug.Log($"[Transition] Удаляем дубликат Синемашины из файла новой сцены: {cam.gameObject.name}");
+                Destroy(cam.gameObject);
+            }
+        }
+
+        Camera[] cameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
+        foreach (Camera cam in cameras)
+        {
+            if (cameraSystemRoot != null && !cam.transform.IsChildOf(cameraSystemRoot.transform) && cam.gameObject != cameraSystemRoot)
+            {
+                if (cam.CompareTag("MainCamera"))
+                {
+                    GameObject rootToDestroy = cam.transform.parent != null ? cam.transform.parent.gameObject : cam.gameObject;
+                    Debug.Log($"[Transition] Удаляем дубликат основной камеры сцены: {rootToDestroy.name}");
+                    Destroy(rootToDestroy);
+                }
+            }
+        }
+        // --------------------------------------------
 
         LevelDoor[] doors = FindObjectsByType<LevelDoor>(FindObjectsSortMode.None);
         LevelDoor targetDoor = null;
@@ -155,7 +184,7 @@ public class TransitionManager : MonoBehaviour
             // Восстановление предметов пола
             RestoreSceneFloorItems(sceneName);
 
-            // Удаление дубликатов предметов (Твой оригинальный код)
+            // Удаление дубликатов предметов
             Debug.Log("[Transition] 4. Запуск оригинальной очистки дубликатов по именам...");
             GrabbableItem[] itemsOnScene = FindObjectsByType<GrabbableItem>(FindObjectsSortMode.None);
             foreach (var item in itemsOnScene)
@@ -179,23 +208,25 @@ public class TransitionManager : MonoBehaviour
             savedHeavyObject = null;
             savedFloatingObjects.Clear();
 
-            // --- ТВОЯ КАМЕРА ---
-            Debug.Log("[Transition] 6. Начинаем поиск Синемашины на сцене...");
-            CinemachineFreeLook activeFreeLookCam = FindObjectOfType<CinemachineFreeLook>();
-
-            if (activeFreeLookCam != null)
+            // --- ТВОЯ КАМЕРА (БЕЗ ДУБЛИКАТОВ И СЛЕПЫХ ПОИСКОВ) ---
+            if (persistentFreeLookCam == null)
             {
-                Debug.Log($"<color=yellow>[Transition] КАМЕРА НАЙДЕНА: {activeFreeLookCam.gameObject.name}. Настраиваем следование за {playerObject.name}...</color>");
-                activeFreeLookCam.Follow = playerObject.transform;
-                activeFreeLookCam.LookAt = playerObject.transform;
-                activeFreeLookCam.m_YAxis.Value = 0.5f;
-                activeFreeLookCam.m_XAxis.Value = 0f;
-                activeFreeLookCam.ForceCameraPosition(worldSpawnPos - (worldSpawnRot * Vector3.forward * 5f) + (Vector3.up * 3f), worldSpawnRot);
+                persistentFreeLookCam = FindObjectOfType<CinemachineFreeLook>();
+            }
+
+            if (persistentFreeLookCam != null)
+            {
+                Debug.Log($"<color=yellow>[Transition] Настраиваем сохраненную Синемашину {persistentFreeLookCam.gameObject.name}...</color>");
+                persistentFreeLookCam.Follow = playerObject.transform;
+                persistentFreeLookCam.LookAt = playerObject.transform;
+                persistentFreeLookCam.m_YAxis.Value = 0.5f;
+                persistentFreeLookCam.m_XAxis.Value = 0f;
+                persistentFreeLookCam.ForceCameraPosition(worldSpawnPos - (worldSpawnRot * Vector3.forward * 5f) + (Vector3.up * 3f), worldSpawnRot);
                 Debug.Log("<color=green>[Transition] НАСТРОЙКА КАМЕРЫ УСПЕШНО ЗАВЕРШЕНА!</color>");
             }
             else
             {
-                Debug.LogError("<color=red>[Transition] КРИТИЧЕСКАЯ ОШИБКА: FindObjectOfType<CinemachineFreeLook>() вернул NULL! Камера вообще не найдена на сцене!</color>");
+                Debug.LogError("<color=red>[Transition] КРИТИЧЕСКАЯ ОШИБКА: Синемашина полностью потеряна при переходе!</color>");
             }
         }
     }
@@ -203,9 +234,22 @@ public class TransitionManager : MonoBehaviour
     private void CleanupAudioListeners()
     {
         AudioListener[] listeners = FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
-        if (listeners.Length > 1)
+        foreach (var listener in listeners)
         {
-            for (int i = 1; i < listeners.Length; i++) Destroy(listeners[i]);
+            if (listener == null) continue;
+
+            // Если у нас есть сквозная рабочая камера, защищаем привязанный к ней слушатель
+            if (cameraSystemRoot != null)
+            {
+                if (listener.transform.IsChildOf(cameraSystemRoot.transform) || listener.gameObject == cameraSystemRoot)
+                {
+                    continue; // Пропускаем, этот слушатель должен жить
+                }
+            }
+
+            // Все остальные левые слушатели из файлов новых сцен уничтожаем
+            Debug.Log($"[Transition] Удаляем дубликат AudioListener на объекте: {listener.gameObject.name}");
+            Destroy(listener);
         }
     }
 
@@ -296,6 +340,7 @@ public class TransitionManager : MonoBehaviour
                 var tracked = persistentFloorItems[i];
                 if (tracked == null || tracked.gameObject == null)
                 {
+                    persistentFreeLookCam = null; // Обнуляем на всякий случай сломанные ссылки
                     persistentFloorItems.RemoveAt(i);
                     continue;
                 }

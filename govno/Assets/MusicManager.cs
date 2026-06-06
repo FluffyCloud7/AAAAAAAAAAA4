@@ -5,21 +5,20 @@ using UnityEngine.UI;
 
 public class MusicManager : MonoBehaviour
 {
-    private static MusicManager Instance;
+    public static MusicManager Instance { get; private set; } // Сделали публичным геттер для удобства
     private AudioSource audioSource;
 
     [Header("Список фоновой музыки для рандома")]
     public List<AudioClip> musicPlaylist;
 
     [Header("Настройки переходов (в секундах)")]
-    [SerializeField] private float fadeDuration = 2.0f; // Время затухания и нарастания
+    [SerializeField] private float fadeDuration = 2.0f;
 
-    [SerializeField] private Slider musicSlider;
-
+    private Slider musicSlider;
     private List<AudioClip> playQueue = new List<AudioClip>();
     private AudioClip lastPlayedClip;
-    private float targetVolume = 1f; // Громкость, которую выставил игрок на слайдере
-    private bool isTransitioning = false; // Флаг, чтобы Update не мешал затуханию
+    private float targetVolume = 1f;
+    private bool isTransitioning = false;
 
     private void Awake()
     {
@@ -43,38 +42,38 @@ public class MusicManager : MonoBehaviour
 
     void Start()
     {
-        // Сначала настраиваем ползунок, чтобы узнать целевую громкость игрока
-        if (musicSlider != null)
-        {
-            musicSlider.onValueChanged.AddListener(delegate { SetVolume(musicSlider.value); });
-            targetVolume = musicSlider.value;
-        }
-
         if (musicPlaylist != null && musicPlaylist.Count > 0)
         {
             BuildPlayQueue();
-            // Запускаем первый трек сразу с плавным нарастанием
             PlayNextTrack();
+        }
+    }
+
+    // Метод жесткой привязки конкретного ползунка из меню паузы
+    public void BindSlider(Slider slider)
+    {
+        musicSlider = slider;
+        if (musicSlider != null)
+        {
+            musicSlider.onValueChanged.RemoveAllListeners();
+            musicSlider.value = targetVolume; // Возвращаем ползунок на сохраненное место
+            musicSlider.onValueChanged.AddListener(delegate { SetVolume(musicSlider.value); });
         }
     }
 
     private void Update()
     {
-        // Если идет плавный переход — Update ничего не делает и ждет
         if (isTransitioning) return;
 
-        // Если музыка подошла к концу (осталось меньше времени, чем длится затухание)
         if (audioSource != null && audioSource.isPlaying)
         {
             float timeRemaining = audioSource.clip.length - audioSource.time;
 
-            // Если до конца песни осталось 2 секунды (fadeDuration) — запускаем плавную смену трека!
             if (timeRemaining <= fadeDuration)
             {
                 StartCoroutine(TransitionToNextTrack());
             }
         }
-        // На случай, если музыка вообще почему-то остановилась сама
         else if (audioSource != null && !audioSource.isPlaying && musicPlaylist != null && musicPlaylist.Count > 0)
         {
             StartCoroutine(TransitionToNextTrack());
@@ -103,43 +102,34 @@ public class MusicManager : MonoBehaviour
         }
     }
 
-    // Корутина плавного перехода: глушит старый трек, меняет его и разгоняет новый
     private IEnumerator TransitionToNextTrack()
     {
         isTransitioning = true;
 
-        // 1. ПЛАВНОЕ ЗАТУХАНИЕ (Fade Out)
         float startVolume = audioSource.volume;
         float currentTime = 0;
 
         while (currentTime < fadeDuration)
         {
             currentTime += Time.deltaTime;
-            // Постепенно снижаем громкость от текущей до нуля
             audioSource.volume = Mathf.Lerp(startVolume, 0, currentTime / fadeDuration);
             yield return null;
         }
 
         audioSource.Stop();
-
-        // 2. СМЕНА ТРЕКА
         PlayNextTrack();
 
-        // 3. ПЛАВНОЕ НАРАСТАНИЕ (Fade In)
         audioSource.volume = 0;
         currentTime = 0;
 
         while (currentTime < fadeDuration)
         {
             currentTime += Time.deltaTime;
-            // Постепенно поднимаем громкость от нуля до targetVolume (которую выставил игрок)
             audioSource.volume = Mathf.Lerp(0, targetVolume, currentTime / fadeDuration);
             yield return null;
         }
 
-        // Жестко фиксируем финальную громкость на всякий случай
         audioSource.volume = targetVolume;
-
         isTransitioning = false;
     }
 
@@ -179,11 +169,8 @@ public class MusicManager : MonoBehaviour
     {
         if (Instance != null)
         {
-            // Запоминаем новое значение слайдера как максимальную цель
             Instance.targetVolume = volume;
 
-            // Если прямо сейчас музыка НЕ находится в процессе затухания/нарастания,
-            // то мгновенно применяем громкость. Если переход идет — корутина сама настроит всё.
             if (!Instance.isTransitioning && Instance.audioSource != null)
             {
                 Instance.audioSource.volume = volume;
