@@ -8,21 +8,33 @@ public class GrabbableItem : MonoBehaviour
     public string itemName = "Item";
     public string uniqueID;
 
-    [Header("Настройки анимации (только для LightFloating)")]
+    [Header("Настройки анимации")]
     public float amplitude = 0.2f;
     public float frequency = 2.0f;
     public float rotationSpeed = 45f;
 
+    [Header("Эффекты частиц")]
+    public ParticleSystem particleEffect; // Перетащите сюда ваш эффект (Niagara/Unity Particles)
+
     private Vector3 startPos;
     private bool isPickedUp = false;
 
-    void Start() => startPos = transform.position;
+    void Start()
+    {
+        startPos = transform.position;
+        // При старте проверяем, нужно ли включить эффект
+        UpdateEffectState();
+    }
 
     void Update()
     {
-        // Анимация работает только если предмет НЕ подобран И это легкий предмет
-        if (isPickedUp || itemSize == ItemSize.HeavyInHands) return;
+        // Тяжелые объекты игнорируем
+        if (itemSize == ItemSize.HeavyInHands) return;
 
+        // Если подобран, анимация не нужна
+        if (isPickedUp) return;
+
+        // Покачивание
         float newY = startPos.y + Mathf.Sin(Time.time * frequency) * amplitude;
         transform.position = new Vector3(startPos.x, newY, startPos.z);
         transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.World);
@@ -31,8 +43,26 @@ public class GrabbableItem : MonoBehaviour
     public void SetPickedUp(bool state)
     {
         isPickedUp = state;
-        // Сбрасываем поворот только если это легкий предмет, чтобы он не выглядел странно после броска
         if (state && itemSize == ItemSize.LightFloating)
             transform.rotation = Quaternion.identity;
+
+        UpdateEffectState();
+    }
+
+    private void UpdateEffectState()
+    {
+        if (particleEffect == null) return;
+
+        // Включаем эффект, только если предмет легкий И он НЕ подобран
+        bool shouldBeActive = (itemSize == ItemSize.LightFloating && !isPickedUp);
+
+        if (shouldBeActive && !particleEffect.isPlaying)
+        {
+            particleEffect.Play();
+        }
+        else if (!shouldBeActive && particleEffect.isPlaying)
+        {
+            particleEffect.Stop();
+        }
     }
 }
