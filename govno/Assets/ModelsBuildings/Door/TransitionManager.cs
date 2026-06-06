@@ -10,8 +10,11 @@ public class TransitionManager : MonoBehaviour
 
     [HideInInspector] public string targetDoorID;
     private GameObject playerObject;
-    private GameObject cameraSystemRoot; // Родитель Main Camera
-    private GameObject freeLookCamObject; // Явная ссылка на FreeLook
+    private GameObject cameraSystemRoot;
+
+    // Временное хранилище для переносимых предметов (куба и хоровода)
+    private GameObject savedHeavyObject;
+    private List<GameObject> savedFloatingObjects = new List<GameObject>();
 
     private void Awake()
     {
@@ -26,60 +29,74 @@ public class TransitionManager : MonoBehaviour
         }
     }
 
+    // Тот самый оригинальный рабочий метод перехода
     public void TargetTransition(string sceneName, string doorID, GameObject player, List<GameObject> preservedObjects)
     {
         playerObject = player;
         targetDoorID = doorID;
 
-        // Делаем игрока бессмертным
+        // 1. ЗАБИРАЕМ ССЫЛКИ НА ПРЕДМЕТЫ ИЗ РУК И ХОРОВОДА ПЕРЕД ПЕРЕХОДОМ
+        PlayerGrabIso grabScript = player.GetComponent<PlayerGrabIso>();
+        if (grabScript != null)
+        {
+            savedHeavyObject = grabScript.GetHeavyObject();
+            if (savedHeavyObject != null)
+            {
+                DontDestroyOnLoad(savedHeavyObject);
+            }
+
+            List<GameObject> playerFloating = grabScript.GetFloatingObjectsList();
+            savedFloatingObjects.Clear();
+            if (playerFloating != null)
+            {
+                foreach (GameObject obj in playerFloating)
+                {
+                    if (obj != null)
+                    {
+                        DontDestroyOnLoad(obj);
+                        savedFloatingObjects.Add(obj);
+                    }
+                }
+            }
+        }
+
+        // Защищаем игрока от уничтожения
         DontDestroyOnLoad(playerObject);
 
-        // Явный перенос ВСЕЙ системы камер
+        // Перенос камерной системы
         Camera mainCam = Camera.main;
         if (mainCam != null)
         {
-            if (mainCam.transform.parent != null)
-            {
-                cameraSystemRoot = mainCam.transform.parent.gameObject;
-            }
-            else
-            {
-                cameraSystemRoot = mainCam.gameObject;
-            }
+            cameraSystemRoot = mainCam.transform.parent != null ? mainCam.transform.parent.gameObject : mainCam.gameObject;
             DontDestroyOnLoad(cameraSystemRoot);
-            Debug.Log($"[TransitionManager] Система Main Camera '{cameraSystemRoot.name}' сохранена.");
         }
 
-        // ИСПРАВЛЕНО: Используем FindAnyObjectByType вместо устаревшего FindObjectOfType
-        CinemachineFreeLook freeLookCam = Object.FindAnyObjectByType<CinemachineFreeLook>();
+        CinemachineFreeLook freeLookCam = FindObjectOfType<CinemachineFreeLook>();
         if (freeLookCam != null)
         {
-            freeLookCamObject = freeLookCam.gameObject;
-            DontDestroyOnLoad(freeLookCamObject);
-            Debug.Log($"[TransitionManager] Явно сохранена FreeLook камера '{freeLookCamObject.name}'.");
-        }
-        else
-        {
-            Debug.LogError("[TransitionManager] КРИТИЧЕСКАЯ ОШИБКА! На сцене не найдена CinemachineFreeLook для переноса.");
+            DontDestroyOnLoad(freeLookCam.gameObject);
         }
 
+        // ЗАПУСКАЕМ ТУ САМУЮ РАБОЧУЮ КОРУТИНУ
         StartCoroutine(LoadSceneRoutine(sceneName));
     }
 
+    // Рабочая корутина с безопасными таймингами для Unity 6
     private IEnumerator LoadSceneRoutine(string sceneName)
     {
-        // Загружаем новую сцену
+        // Асинхронная загрузка, которая даёт сцене время подготовиться
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         while (!asyncLoad.isDone)
         {
             yield return null;
         }
 
-        // Ждем один кадр для инициализации объектов сцены
+        // КРИТИЧЕСКИ ВАЖНО: Ждем кадры, чтобы сцена, старые синглтоны и физика полностью проснулись
+        yield return new WaitForEndOfFrame();
         yield return null;
 
-        // Ищем дверь на новой сцене
-        LevelDoor[] doors = Object.FindObjectsByType<LevelDoor>(FindObjectsSortMode.None);
+        // Находим целевую дверь на новой сцене
+        LevelDoor[] doors = FindObjectsByType<LevelDoor>(FindObjectsSortMode.None);
         LevelDoor targetDoor = null;
 
         foreach (var door in doors)
@@ -93,89 +110,86 @@ public class TransitionManager : MonoBehaviour
 
         if (targetDoor != null && playerObject != null)
         {
-            // 1. Отключаем CharacterController, чтобы жестко выставить координаты
+            // 2. ОТКЛЮЧАЕМ ХИТРОЖОПЫЙ ХИТБОКС И ФИЗИКУ (Убивает ложные срабатывания чекпоинтов)
             CharacterController cc = playerObject.GetComponent<CharacterController>();
             if (cc != null) cc.enabled = false;
 
-            // 2. Получаем мировые координаты точки спавна новой двери
             Vector3 worldSpawnPos = targetDoor.spawnPoint.position;
             Quaternion worldSpawnRot = targetDoor.spawnPoint.rotation;
 
-            // 3. Ставим игрока в нужную позицию и разворачиваем его наружу
+            // Перемещаем игрока ровно в точку двери
             playerObject.transform.SetPositionAndRotation(worldSpawnPos, worldSpawnRot);
-            Debug.Log($"[TransitionManager] Игрок телепортирован к двери {targetDoorID}.");
 
-            // 4. Включаем физику игрока обратно
+            // Даем один кадр на фиксацию координат в пространстве
+            yield return null;
+
+            // Включаем физику обратно только тогда, когда игрок уже ТОЧНО стоит у двери
             if (cc != null) cc.enabled = true;
 
-            // 5. МАГИЯ CINEMACHINE: Привязываем ПЕРЕЕХАВШУЮ FreeLook камеру
-            CinemachineFreeLook activeFreeLookCam = null;
-
-            // ИСПРАВЛЕНО: Ищем по всей новой сцене через современный FindAnyObjectByType
-            activeFreeLookCam = Object.FindAnyObjectByType<CinemachineFreeLook>();
-
-            if (activeFreeLookCam != null)
+            // 3. НАМЕРТВО ПЕРЕЗАПИСЫВАЕМ ЧЕКПОИНТ (Перекрываем старые данные респауна)
+            if (respawnController.Instance != null)
             {
-                // Заставляем её снова следить и смотреть на игрока
-                activeFreeLookCam.Follow = playerObject.transform;
-                activeFreeLookCam.LookAt = playerObject.transform;
-                Debug.Log($"[TransitionManager] FreeLook камера '{activeFreeLookCam.name}' (переехавшая!) привязана к игроку.");
-
-                // Исправляем ракурс: Принудительно выставляем вертикальную ось в средний риг
-                activeFreeLookCam.m_YAxis.Value = 0.5f;
-                // Принудительно выставляем горизонтальную ось наружу от двери
-                activeFreeLookCam.m_XAxis.Value = 0f;
-
-                // Жестко сбрасываем позицию камеры к игроку в этом кадре
-                activeFreeLookCam.ForceCameraPosition(worldSpawnPos - (worldSpawnRot * Vector3.forward * 5f) + (Vector3.up * 3f), worldSpawnRot);
-            }
-            else
-            {
-                Debug.LogWarning("[TransitionManager] На новой сцене не найдена CinemachineFreeLook для привязки!");
+                respawnController.Instance.respawnPoint = targetDoor.spawnPoint;
             }
 
-            // Удаление второго AudioListener если он есть
-            AudioListener[] allAudioListeners = Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
-            if (allAudioListeners.Length > 1)
+            // 4. УДАЛЕНИЕ СТАТИЧНЫХ ДЮПОВ ИЗ СЦЕНЫ
+            GrabbableItem[] itemsOnScene = FindObjectsByType<GrabbableItem>(FindObjectsSortMode.None);
+            foreach (var item in itemsOnScene)
             {
-                Debug.LogWarning($"[TransitionManager] Найдено {allAudioListeners.Length} AudioListeners. Удаляем дубликат.");
-                if (Camera.main != null && Camera.main.gameObject.GetComponent<AudioListener>() != null)
+                // Пропускаем объекты, приехавшие с игроком
+                if (item.gameObject == savedHeavyObject || savedFloatingObjects.Contains(item.gameObject)) continue;
+
+                // Если имя совпало с тяжелым кубом в руках — сносим дубликат со сцены
+                if (savedHeavyObject != null)
                 {
-                    foreach (var al in allAudioListeners)
+                    GrabbableItem heavyComp = savedHeavyObject.GetComponent<GrabbableItem>();
+                    if (heavyComp != null && item.itemName == heavyComp.itemName)
                     {
-                        if (al.gameObject != Camera.main.gameObject)
+                        Destroy(item.gameObject);
+                        continue;
+                    }
+                }
+
+                // Если имя совпало с предметом из хоровода — сносим дубликат со сцены
+                foreach (GameObject floatObj in savedFloatingObjects)
+                {
+                    if (floatObj != null)
+                    {
+                        GrabbableItem floatComp = floatObj.GetComponent<GrabbableItem>();
+                        if (floatComp != null && item.itemName == floatComp.itemName)
                         {
-                            Destroy(al);
+                            Destroy(item.gameObject);
+                            break;
                         }
                     }
                 }
             }
 
-            // Ждем два кадра, чтобы сцена утряслась
-            yield return null;
-            yield return null;
-
-            // 6. Обновляем точку чекпоинта
-            // ИСПРАВЛЕНО: Ищем менеджер респауна через современный FindAnyObjectByType
-            respawnController rc = Object.FindAnyObjectByType<respawnController>();
-            if (rc != null)
+            // 5. ПРИНУДИТЕЛЬНО ВОЗВРАЩАЕМ ПРЕДМЕТЫ В ЛОГИКУ ИГРОКА
+            PlayerGrabIso grabScript = playerObject.GetComponent<PlayerGrabIso>();
+            if (grabScript != null)
             {
-                rc.respawnPoint = targetDoor.spawnPoint;
-                Debug.Log($"[TransitionManager] Точка респауна '{rc.name}' успешно обновлена.");
+                grabScript.RestoreGrabbedItems(savedHeavyObject, savedFloatingObjects);
             }
-            else
+
+            // Очищаем кэш ссылок менеджера
+            savedHeavyObject = null;
+            savedFloatingObjects.Clear();
+
+            // 6. СТАБИЛИЗАЦИЯ КАМЕРЫ CINEMACHINE ПОСЛЕ ТЕЛЕПОРТА
+            CinemachineFreeLook activeFreeLookCam = FindObjectOfType<CinemachineFreeLook>();
+            if (activeFreeLookCam != null)
             {
-                // Супер-хак на случай тотального сбоя сцены
-                Debug.LogError($"[TransitionManager] СУПЕР-КРИТИЧЕСКАЯ ОШИБКА! respawnController не найден! Применяем принудительное удержание позиции.");
-                if (targetDoor.spawnPoint != null)
-                {
-                    targetDoor.spawnPoint.SetParent(playerObject.transform);
-                }
+                activeFreeLookCam.Follow = playerObject.transform;
+                activeFreeLookCam.LookAt = playerObject.transform;
+                activeFreeLookCam.m_YAxis.Value = 0.5f;
+                activeFreeLookCam.m_XAxis.Value = 0f;
+                activeFreeLookCam.ForceCameraPosition(worldSpawnPos - (worldSpawnRot * Vector3.forward * 5f) + (Vector3.up * 3f), worldSpawnRot);
             }
         }
         else
         {
-            Debug.LogError($"[TransitionManager] Ошибка перехода! Дверь '{targetDoorID}' не найдена на сцене {sceneName}!");
+            Debug.LogError($"[TransitionManager] Не удалось найти целевую дверь '{targetDoorID}' на новой сцене!");
         }
     }
 }

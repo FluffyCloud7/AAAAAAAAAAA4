@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Cinemachine;
 
 public class LevelDoor : MonoBehaviour
 {
@@ -27,28 +26,32 @@ public class LevelDoor : MonoBehaviour
             if (health != null && (health.CurrentHealth <= 0 || health.IsDead)) return;
 
             isTransitioning = true;
-            Debug.Log($"[LevelDoor] Начинается переход...");
-
-            // Запускаем переход через менеджер
-            PerformTransition(other.gameObject);
+            StartCoroutine(StableTransitionRoutine(other.gameObject));
         }
     }
 
-    private void PerformTransition(GameObject player)
+    private IEnumerator StableTransitionRoutine(GameObject player)
     {
-        // КРИТИЧЕСКИ ВАЖНО (ХАК): Сбрасываем точку спавна у синглтона. 
-        // Если онDontDestroyOnLoad, это сработает.
+        // Стабильно обновляем чекпоинт до загрузки сцены
         if (respawnController.Instance != null)
         {
-            respawnController.Instance.respawnPoint = null;
-            Debug.Log("[LevelDoor] ХАК: Точка спавна у синглтона сброшена в NULL перед переходом.");
+            respawnController.Instance.respawnPoint = spawnPoint;
         }
+
+        // Даем Unity один кадр переварить смену чекпоинта
+        yield return null;
 
         List<GameObject> objectsToPreserve = new List<GameObject>();
         objectsToPreserve.Add(player);
 
-        // Мы не переносим камеры здесь, менеджер их найдет
-        TransitionManager.Instance.TargetTransition(targetSceneName, targetDoorID, player, objectsToPreserve);
+        if (TransitionManager.Instance != null)
+        {
+            TransitionManager.Instance.TargetTransition(targetSceneName, targetDoorID, player, objectsToPreserve);
+        }
+        else
+        {
+            Debug.LogError("[LevelDoor] TransitionManager не найден на сцене!");
+        }
     }
 
     private void OnDrawGizmos()

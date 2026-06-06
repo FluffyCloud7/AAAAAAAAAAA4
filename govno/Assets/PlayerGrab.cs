@@ -210,4 +210,53 @@ public class PlayerGrabIso : MonoBehaviour
         }
         return false;
     }
+
+    // --- МЕТОДЫ ДЛЯ ПЕРЕНОСА ПРЕДМЕТОВ МЕЖДУ СЦЕНАМИ ---
+
+    // Отдает менеджеру текущую тяжелую коробку
+    public GameObject GetHeavyObject()
+    {
+        return heldHeavyObject;
+    }
+
+    // Отдает менеджеру список летающих предметов
+    public List<GameObject> GetFloatingObjectsList()
+    {
+        return floatingObjects;
+    }
+
+    // Принудительно возвращает предметы в логику игрока после загрузки сцены
+    public void RestoreGrabbedItems(GameObject heavyObj, List<GameObject> targetsFloating)
+    {
+        // Возвращаем тяжелый предмет
+        if (heavyObj != null)
+        {
+            heldHeavyObject = heavyObj;
+            heldHeavyRb = heldHeavyObject.GetComponent<Rigidbody>();
+            heldHeavyCollider = heldHeavyObject.GetComponent<Collider>();
+
+            // На всякий случай обновляем игнорирование коллизий на новой сцене
+            if (playerCollider != null && heldHeavyCollider != null)
+                Physics.IgnoreCollision(playerCollider, heldHeavyCollider, true);
+
+            if (animator != null) animator.SetBool("IsHoldingHeavy", true);
+        }
+
+        // Возвращаем хоровод
+        floatingObjects.Clear();
+        if (targetsFloating != null)
+        {
+            foreach (GameObject obj in targetsFloating)
+            {
+                if (obj != null)
+                {
+                    Collider col = obj.GetComponent<Collider>();
+                    if (playerCollider != null && col != null)
+                        Physics.IgnoreCollision(playerCollider, col, true);
+
+                    floatingObjects.Add(obj);
+                }
+            }
+        }
+    }
 }
