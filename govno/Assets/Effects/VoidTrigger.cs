@@ -10,19 +10,30 @@ public class VoidTrigger : MonoBehaviour
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
-                // Вызываем мгновенную смерть для бездны
                 playerHealth.TakeVoidDamage();
             }
-            return; // Выходим из метода, так как это был игрок
+            return;
         }
 
-        // 2. Если это не игрок, проверяем, не губка ли это упала
+        // 2. Проверяем, не губка ли это упала
         SpongeCleaner sponge = other.GetComponent<SpongeCleaner>();
         if (sponge != null)
         {
-            // Возвращаем губку на стартовую позицию и моем её
             sponge.RespawnSponge();
             Debug.Log("[VoidTrigger]: Губка упала в бездну и была возвращена на спавн.");
+            return; // Выходим, чтобы не делать лишних проверок
+        }
+
+        // 3. ПРОВЕРКА НА ТЯЖЕЛЫЙ ПРЕДМЕТ
+        GrabbableItem item = other.GetComponent<GrabbableItem>();
+        if (item != null)
+        {
+            // Проверяем, что предмет именно тяжелый
+            if (item.itemSize == ItemSize.HeavyInHands)
+            {
+                item.Respawn();
+                Debug.Log($"[VoidTrigger]: Тяжелый предмет {item.itemName} возвращен на спавн.");
+            }
         }
     }
 }

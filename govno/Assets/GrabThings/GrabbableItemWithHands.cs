@@ -14,27 +14,27 @@ public class GrabbableItem : MonoBehaviour
     public float rotationSpeed = 45f;
 
     [Header("Эффекты частиц")]
-    public ParticleSystem particleEffect; // Перетащите сюда ваш эффект (Niagara/Unity Particles)
+    public ParticleSystem particleEffect;
 
     private Vector3 startPos;
+    private Quaternion startRot; // Запоминаем исходный поворот
+    private Rigidbody rb;        // Ссылка на физику
     private bool isPickedUp = false;
 
     void Start()
     {
         startPos = transform.position;
-        // При старте проверяем, нужно ли включить эффект
+        startRot = transform.rotation; // Сохраняем начальное вращение
+        rb = GetComponent<Rigidbody>(); // Пробуем получить Rigidbody
+
         UpdateEffectState();
     }
 
     void Update()
     {
-        // Тяжелые объекты игнорируем
         if (itemSize == ItemSize.HeavyInHands) return;
-
-        // Если подобран, анимация не нужна
         if (isPickedUp) return;
 
-        // Покачивание
         float newY = startPos.y + Mathf.Sin(Time.time * frequency) * amplitude;
         transform.position = new Vector3(startPos.x, newY, startPos.z);
         transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.World);
@@ -53,7 +53,6 @@ public class GrabbableItem : MonoBehaviour
     {
         if (particleEffect == null) return;
 
-        // Включаем эффект, только если предмет легкий И он НЕ подобран
         bool shouldBeActive = (itemSize == ItemSize.LightFloating && !isPickedUp);
 
         if (shouldBeActive && !particleEffect.isPlaying)
@@ -64,5 +63,23 @@ public class GrabbableItem : MonoBehaviour
         {
             particleEffect.Stop();
         }
+    }
+
+    // --- НОВЫЙ МЕТОД ДЛЯ РЕСПАВНА ---
+    public void Respawn()
+    {
+        // Перемещаем в начальную точку
+        transform.position = startPos;
+        transform.rotation = startRot;
+
+        // Если у объекта есть физика, сбрасываем её импульс
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero; // В Unity 6 вместо velocity используется linearVelocity
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // На всякий случай сообщаем, что объект больше не в руках (если его уронили в бездну вместе с игроком)
+        SetPickedUp(false);
     }
 }

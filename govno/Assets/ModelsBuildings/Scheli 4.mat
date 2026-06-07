@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LavkaDark 1
-  m_Shader: {fileID: -6465566751694194690, guid: 656d0b2bb9e93734cb4fc6421696519c, type: 3}
+  m_Name: Scheli 4
+  m_Shader: {fileID: 4800000, guid: dd7d8b72ae6329b46bbd179b375079e6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -38,10 +38,6 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Base_Texture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -77,24 +73,12 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Paper_Fibers:
-        m_Texture: {fileID: 2800000, guid: 2398a107c97fb6647a157c0462b3b90c, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Paper_Normal:
-        m_Texture: {fileID: 2800000, guid: 3f0b1d30c96b31a41a9f477efbc73144, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Triplanar_e38af7ff3f614b4d8e8f4f73e4917a6b_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: 33cf5ddbc9c5ab74897bc14a4fa31c4f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -132,12 +116,9 @@ Material:
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseScale: 81.16
-    - _Normal_Strength: 0.33
+    - _NoiseScale: -864.4
     - _OcclusionStrength: 1
-    - _Paper_Scale: 0.35
     - _Parallax: 0.02
-    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0
@@ -151,11 +132,9 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.4811321, g: 0.4373599, b: 0.39716092, a: 1}
+    - _BaseColor: {r: 0.26415092, g: 0.23403391, b: 0.19312921, a: 1}
     - _Color: {r: 0.42452827, g: 0.39588705, b: 0.3344161, a: 1}
-    - _Color_Real: {r: 0.64907444, g: 0.79205245, b: 0.9622642, a: 1}
-    - _DarkThingies: {r: 0.24510503, g: 0.35427883, b: 0.6415094, a: 1}
-    - _DirtColor: {r: 0.16981131, g: 0.149848, b: 0.10493057, a: 1}
+    - _DirtColor: {r: 0.5660378, g: 0.4212371, b: 0.26432896, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
