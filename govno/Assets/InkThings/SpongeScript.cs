@@ -170,18 +170,5 @@ public class SpongeCleaner : MonoBehaviour
         WashSponge();
     }
 
-    private void OnMouseEnter()
-    {
-        if (CursorVisualController.Instance != null) CursorVisualController.Instance.SetInteractableState(true);
-    }
-
-    private void OnMouseExit()
-    {
-        if (CursorVisualController.Instance != null) CursorVisualController.Instance.SetInteractableState(false);
-    }
-
-    private void OnDisable()
-    {
-        if (CursorVisualController.Instance != null) CursorVisualController.Instance.SetInteractableState(false);
-    }
+    
 }
