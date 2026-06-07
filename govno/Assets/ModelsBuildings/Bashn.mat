@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PolosuYzor
+  m_Name: Bashn
   m_Shader: {fileID: -6465566751694194690, guid: 37a15558b6c4afe4d846c34910df01a9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -29,11 +29,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Paper_Fibers:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 2398a107c97fb6647a157c0462b3b90c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Paper_Normal:
-        m_Texture: {fileID: 2800000, guid: 6ac878e469cecbd49adc26c78b9e1c84, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3f0b1d30c96b31a41a9f477efbc73144, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_db1aa77817004aff9fdccc8e7209ae0e_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 33cf5ddbc9c5ab74897bc14a4fa31c4f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Triplanar_e38af7ff3f614b4d8e8f4f73e4917a6b_Texture_1_Texture2D:
@@ -54,14 +58,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Normal_Strength: 0.56
-    - _Paper_Scale: 5
+    - _Normal_Strength: 0.33
+    - _Paper_Scale: 0.36
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Smoothness: 0.2
+    - _Smoothness: 0
     m_Colors:
-    - _Color_Real: {r: 0.71342117, g: 0.85669833, b: 0.9056604, a: 1}
-    - _DarkThingies: {r: 0.764151, g: 0.764151, b: 0.764151, a: 1}
+    - _Color_Real: {r: 0.764931, g: 0.5484603, b: 0.8018868, a: 1}
+    - _DarkThingies: {r: 0.67930204, g: 0.59073514, b: 0.7075472, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &6426463030372771580
