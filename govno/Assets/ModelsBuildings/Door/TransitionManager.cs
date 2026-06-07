@@ -11,7 +11,7 @@ public class TransitionManager : MonoBehaviour
     [HideInInspector] public string targetDoorID;
     private GameObject playerObject;
     private GameObject cameraSystemRoot;
-    private CinemachineFreeLook persistentFreeLookCam; // <-- Прямая ссылка на рабочую Синемашину
+    private CinemachineFreeLook persistentFreeLookCam; // Основная Синемашина
 
     private GameObject savedHeavyObject;
     private List<GameObject> savedFloatingObjects = new List<GameObject>();
@@ -119,7 +119,7 @@ public class TransitionManager : MonoBehaviour
             }
         }
 
-        // --- ФИКС ДУБЛИКАТОВ КАМЕРЫ И СИНЕМАШИНЫ ---
+        // --- ФИКС ДУБЛИКАТОВ КАМЕРЫ И СИНЕМАШИНЫ (С ИСКЛЮЧЕНИЕМ ДЛЯ VCam_Mouse) ---
         CinemachineFreeLook[] freeLookCams = FindObjectsByType<CinemachineFreeLook>(FindObjectsSortMode.None);
         foreach (var cam in freeLookCams)
         {
@@ -130,12 +130,13 @@ public class TransitionManager : MonoBehaviour
             }
         }
 
+        // Удаляем только дефолтные MainCamera новой сцены, НЕ трогая систему мыши и оффсетов
         Camera[] cameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
         foreach (Camera cam in cameras)
         {
             if (cameraSystemRoot != null && !cam.transform.IsChildOf(cameraSystemRoot.transform) && cam.gameObject != cameraSystemRoot)
             {
-                if (cam.CompareTag("MainCamera"))
+                if (cam.CompareTag("MainCamera") && cam.gameObject.name != "VCam_Mouse")
                 {
                     GameObject rootToDestroy = cam.transform.parent != null ? cam.transform.parent.gameObject : cam.gameObject;
                     Debug.Log($"[Transition] Удаляем дубликат основной камеры сцены: {rootToDestroy.name}");
@@ -208,7 +209,7 @@ public class TransitionManager : MonoBehaviour
             savedHeavyObject = null;
             savedFloatingObjects.Clear();
 
-            // --- ТВОЯ КАМЕРА (БЕЗ ДУБЛИКАТОВ И СЛЕПЫХ ПОИСКОВ) ---
+            // --- НАСТРОЙКА ГЛАВНОЙ СИНЕМАШИНЫ FREELOOK ---
             if (persistentFreeLookCam == null)
             {
                 persistentFreeLookCam = FindObjectOfType<CinemachineFreeLook>();
@@ -222,11 +223,28 @@ public class TransitionManager : MonoBehaviour
                 persistentFreeLookCam.m_YAxis.Value = 0.5f;
                 persistentFreeLookCam.m_XAxis.Value = 0f;
                 persistentFreeLookCam.ForceCameraPosition(worldSpawnPos - (worldSpawnRot * Vector3.forward * 5f) + (Vector3.up * 3f), worldSpawnRot);
-                Debug.Log("<color=green>[Transition] НАСТРОЙКА КАМЕРЫ УСПЕШНО ЗАВЕРШЕНА!</color>");
             }
             else
             {
-                Debug.LogError("<color=red>[Transition] КРИТИЧЕСКАЯ ОШИБКА: Синемашина полностью потеряна при переходе!</color>");
+                Debug.LogError("<color=red>[Transition] КРИТИЧЕСКАЯ ОШИБКА: Синемашина Freelook потеряна при переходе!</color>");
+            }
+
+            // --- ПЕРЕПРИВЯЗКА ТВОЕЙ КАМЕРЫ МЫШИ (VCam_Mouse) ---
+            CinemachineVirtualCamera[] virtualCameras = FindObjectsByType<CinemachineVirtualCamera>(FindObjectsSortMode.None);
+            bool mouseCamFound = false;
+            foreach (var vcam in virtualCameras)
+            {
+                if (vcam.gameObject.name == "VCam_Mouse")
+                {
+                    vcam.Follow = playerObject.transform;
+                    mouseCamFound = true;
+                    Debug.Log("<color=green>[Transition] Камера VCam_Mouse успешно найдена на новой сцене и привязана к игроку!</color>");
+                    break;
+                }
+            }
+            if (!mouseCamFound)
+            {
+                Debug.LogWarning("[Transition] Предупреждение: Камера 'VCam_Mouse' не обнаружена в файле этой сцены.");
             }
         }
     }
@@ -238,16 +256,14 @@ public class TransitionManager : MonoBehaviour
         {
             if (listener == null) continue;
 
-            // Если у нас есть сквозная рабочая камера, защищаем привязанный к ней слушатель
             if (cameraSystemRoot != null)
             {
                 if (listener.transform.IsChildOf(cameraSystemRoot.transform) || listener.gameObject == cameraSystemRoot)
                 {
-                    continue; // Пропускаем, этот слушатель должен жить
+                    continue;
                 }
             }
 
-            // Все остальные левые слушатели из файлов новых сцен уничтожаем
             Debug.Log($"[Transition] Удаляем дубликат AudioListener на объекте: {listener.gameObject.name}");
             Destroy(listener);
         }
@@ -266,7 +282,7 @@ public class TransitionManager : MonoBehaviour
                 if (item == null) continue;
                 if (item.gameObject == savedHeavyObject || savedFloatingObjects.Contains(item.gameObject)) continue;
 
-                string id = string.IsNullOrEmpty(item.uniqueID) ? item.gameObject.name : item.uniqueID;
+                string id = item.gameObject.name;
 
                 TrackedFloorItem tracked = persistentFloorItems.Find(x => x.gameObject == item.gameObject);
                 if (tracked == null)
@@ -304,14 +320,14 @@ public class TransitionManager : MonoBehaviour
             if (savedHeavyObject != null)
             {
                 var gi = savedHeavyObject.GetComponent<GrabbableItem>();
-                if (gi != null) activeTrackedIDs.Add(string.IsNullOrEmpty(gi.uniqueID) ? savedHeavyObject.name : gi.uniqueID);
+                if (gi != null) activeTrackedIDs.Add(savedHeavyObject.name);
             }
             foreach (GameObject floatObj in savedFloatingObjects)
             {
                 if (floatObj != null)
                 {
                     var gi = floatObj.GetComponent<GrabbableItem>();
-                    if (gi != null) activeTrackedIDs.Add(string.IsNullOrEmpty(gi.uniqueID) ? floatObj.name : gi.uniqueID);
+                    if (gi != null) activeTrackedIDs.Add(floatObj.name);
                 }
             }
             foreach (var tracked in persistentFloorItems)
@@ -325,7 +341,7 @@ public class TransitionManager : MonoBehaviour
                 if (item == null) continue;
                 if (item.gameObject == savedHeavyObject || savedFloatingObjects.Contains(item.gameObject)) continue;
 
-                string id = string.IsNullOrEmpty(item.uniqueID) ? item.gameObject.name : item.uniqueID;
+                string id = item.gameObject.name;
                 if (activeTrackedIDs.Contains(id))
                 {
                     Destroy(item.gameObject);
@@ -340,7 +356,7 @@ public class TransitionManager : MonoBehaviour
                 var tracked = persistentFloorItems[i];
                 if (tracked == null || tracked.gameObject == null)
                 {
-                    persistentFreeLookCam = null; // Обнуляем на всякий случай сломанные ссылки
+                    persistentFreeLookCam = null;
                     persistentFloorItems.RemoveAt(i);
                     continue;
                 }
