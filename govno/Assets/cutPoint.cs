@@ -1,15 +1,15 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Collider2D))] // Или Collider, если у тебя 3D-коллайдеры
 public class CutPoint : MonoBehaviour
 {
-    public enum PointType { Core, Flap } // Core - грань фигуры, Flap - ушко
+    public enum PointType { Core, Flap }
+
+    [Header("Тип точки для логики")]
+    public PointType pointType = PointType.Core;
 
     private CuttableShape parent;
     public bool Visited { get; private set; }
-
-    [Header("Тип точки для логики")]
-    public PointType pointType;
 
     [Header("Спрайты точки")]
     [SerializeField] private Sprite neutralSprite;
@@ -22,9 +22,6 @@ public class CutPoint : MonoBehaviour
         parent = shape;
         Visited = false;
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-
-        if (spriteRenderer == null)
-            Debug.LogError($"На точке {gameObject.name} нет SpriteRenderer!");
 
         SetPointSprite(neutralSprite);
     }
@@ -41,14 +38,12 @@ public class CutPoint : MonoBehaviour
         if (Visited) return;
         Visited = true;
         SetPointSprite(visitedSprite);
-        if (spriteRenderer != null) spriteRenderer.color = Color.white;
     }
 
     public void ResetPoint()
     {
         Visited = false;
         SetPointSprite(neutralSprite);
-        if (spriteRenderer != null) spriteRenderer.color = Color.white;
     }
 
     private void SetPointSprite(Sprite newSprite)

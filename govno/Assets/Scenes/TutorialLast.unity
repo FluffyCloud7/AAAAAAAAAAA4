@@ -7350,7 +7350,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 2
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &94587424
@@ -14005,7 +14004,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &174388841
@@ -14845,7 +14843,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &200129707
@@ -19411,9 +19408,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e761d9754878f749ab85bfa6935ac5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CuttableShape
-  allPoints: []
+  points: []
   resultPrefab: {fileID: 0}
   spawnPoint: {fileID: 338697695}
+  spawnParticlesPrefab: {fileID: 0}
   solidLineMaterial: {fileID: 0}
   cutAnimationDuration: 0.8
   solidLineWidthMultiplier: 0.3
@@ -20175,7 +20173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20ad83f6713564e458657ec5c68fa486, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CutValidator
-  totalUniqueJoints: 4
+  requiredFlapCount: 3
   successPrefab: {fileID: 919132149155446097, guid: 872c7c1d87636d54fab4be2a9b9a477d, type: 3}
   failurePrefab: {fileID: 919132149155446097, guid: 390e3086615e63e45a22893ea343c52e, type: 3}
 --- !u!4 &359009489
@@ -20264,7 +20262,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 359998983}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.041624635, y: 0.95133907, z: -0.14840762, w: -0.26682684}
+  m_LocalRotation: {x: 0.15413053, y: 0.007115109, z: -0.0011099479, w: 0.9880243}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20378,7 +20376,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &364316569
@@ -21564,7 +21561,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &398836136
@@ -22899,7 +22895,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 4
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &430350904
@@ -23104,7 +23099,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &435251680
@@ -23398,7 +23392,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 469165459}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.03396535, y: 0.95519936, z: -0.121099375, w: -0.2679095}
+  m_LocalRotation: {x: 0.12576926, y: 0.00714398, z: -0.0009057084, w: 0.9920334}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -38132,7 +38126,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &665237109
@@ -38349,7 +38342,7 @@ Transform:
   m_GameObject: {fileID: 665679090}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -238.86974, y: 37.74, z: 7.0719204}
+  m_LocalPosition: {x: -179.4936, y: 34.43, z: 30.820675}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -38493,6 +38486,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 254823e35ac8d6242a08ab453be3a5e6, type: 3}
+--- !u!1 &666483983 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 37609934689933458, guid: fa04dc62f8eab074a95cac52dda62c97, type: 3}
+  m_PrefabInstance: {fileID: 7174331553176131175}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &670420220
 GameObject:
   m_ObjectHideFlags: 0
@@ -39880,7 +39878,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 2
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &746478865
@@ -42505,7 +42502,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &784995983
@@ -49431,7 +49427,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &878492936
@@ -49890,7 +49885,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &904579675
@@ -65825,7 +65819,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &975449657
@@ -66111,7 +66104,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 4
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &990687950
@@ -66996,7 +66988,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1013470948
@@ -73283,7 +73274,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1068471098
@@ -78671,7 +78661,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1301074510
@@ -78762,7 +78751,7 @@ Transform:
   m_GameObject: {fileID: 1302723607}
   serializedVersion: 2
   m_LocalRotation: {x: 0.6532815, y: -0.27059805, z: 0.27059805, w: 0.6532815}
-  m_LocalPosition: {x: -242.25, y: 44.34, z: 1.5200008}
+  m_LocalPosition: {x: -179.4, y: 41.03, z: 37.32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -92236,7 +92225,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1447172172
@@ -93842,7 +93830,7 @@ Transform:
   m_GameObject: {fileID: 1499570096}
   serializedVersion: 2
   m_LocalRotation: {x: 0.6532815, y: -0.27059805, z: 0.27059805, w: 0.6532815}
-  m_LocalPosition: {x: -242.25, y: 44.34, z: 1.5200008}
+  m_LocalPosition: {x: -179.4, y: 41.03, z: 37.32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -95550,7 +95538,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1581995696
@@ -97644,7 +97631,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1678770003
@@ -98765,7 +98751,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1726160914
@@ -98820,9 +98805,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e761d9754878f749ab85bfa6935ac5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  allPoints: []
-  resultPrefab: {fileID: 919132149155446097, guid: 8077be09d52bd964bbbc6b7e862e531e, type: 3}
+  points:
+  - {fileID: 200129706}
+  - {fileID: 665237108}
+  - {fileID: 1013470947}
+  - {fileID: 1581995695}
+  - {fileID: 364316568}
+  - {fileID: 1447172171}
+  - {fileID: 1301074509}
+  - {fileID: 1854973088}
+  - {fileID: 1068471097}
+  - {fileID: 975449656}
+  resultPrefab: {fileID: 666483983}
   spawnPoint: {fileID: 1993198533}
+  spawnParticlesPrefab: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   solidLineMaterial: {fileID: 2100000, guid: 70f4daa2ba3b6cf4d842ecad528d745b, type: 2}
   cutAnimationDuration: 0.5
   solidLineWidthMultiplier: 1
@@ -100530,7 +100526,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 3
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1788085106
@@ -111288,7 +111283,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1845859703}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.049300365, y: 0.94666475, z: -0.17577453, w: -0.2655159}
+  m_LocalRotation: {x: 0.18255268, y: 0.0070801494, z: -0.0013146257, w: 0.98316973}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -111691,7 +111686,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 0
-  jointID: 0
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1854973089
@@ -119374,7 +119368,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 3
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &1970816123
@@ -126502,7 +126495,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 1
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &2078954442
@@ -127673,7 +127665,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pointType: 1
-  jointID: 1
   neutralSprite: {fileID: 21300000, guid: 5574ccd46a0b9d24a89a790d47f9084b, type: 3}
   visitedSprite: {fileID: 21300000, guid: dae81fbd208e7b843a12f8859b3b8591, type: 3}
 --- !u!135 &2146118377
@@ -129124,15 +129115,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5302745961718653468, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -242.25
+      value: -179.4
       objectReference: {fileID: 0}
     - target: {fileID: 5302745961718653468, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 35.24
+      value: 31.93
       objectReference: {fileID: 0}
     - target: {fileID: 5302745961718653468, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.52
+      value: 37.32
       objectReference: {fileID: 0}
     - target: {fileID: 5302745961718653468, guid: b8f6cf180858d134c9e99eff04b2c0dd, type: 3}
       propertyPath: m_LocalRotation.w

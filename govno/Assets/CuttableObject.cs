@@ -28,10 +28,16 @@ public class CuttableShape : MonoBehaviour
     private LineRenderer dottedLineRenderer;
     private LineRenderer solidLineRenderer;
     private Camera mainCamera;
+    private CutValidator localValidator; // —сылка на собственный валидатор
 
     private void Start()
     {
         mainCamera = Camera.main;
+
+        // ѕытаемс€ найти валидатор на этом же объекте или внутри него
+        localValidator = GetComponent<CutValidator>();
+        if (localValidator == null) localValidator = GetComponentInChildren<CutValidator>();
+
         dottedLineRenderer = GetComponent<LineRenderer>();
         dottedLineRenderer.positionCount = 0;
         dottedLineRenderer.useWorldSpace = false;
@@ -243,16 +249,16 @@ public class CuttableShape : MonoBehaviour
         Vector3 finalSpawnPos = spawnPoint != null ? spawnPoint.position : transform.position + Vector3.right * 2f;
         GameObject prefabToSpawn = resultPrefab;
 
-        if (CutValidator.Instance != null)
+        // ¬ажное изменение: используем Ћќ јЋ№Ќџ… валидатор, прив€занный конкретно к этой форме
+        if (localValidator != null)
         {
             List<CutPoint> visitedPointsList = new List<CutPoint>();
             foreach (var point in points)
             {
-                if (point.Visited) visitedPointsList.Add(point);
+                if (point != null && point.Visited) visitedPointsList.Add(point);
             }
 
-            // ѕередаем валидатору то, что нарезали, и вообще ¬—≈ точки этой формы
-            prefabToSpawn = CutValidator.Instance.ValidateCut(visitedPointsList, points);
+            prefabToSpawn = localValidator.ValidateCut(visitedPointsList, points);
         }
 
         if (prefabToSpawn != null) Instantiate(prefabToSpawn, finalSpawnPos, Quaternion.identity);
